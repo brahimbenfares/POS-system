@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class AISalesForecastDAO {
+public class ForecastDAO {
     private static final String DB_URL = "jdbc:mysql://127.0.0.2:3306/walid_db";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "theJunior@05";
