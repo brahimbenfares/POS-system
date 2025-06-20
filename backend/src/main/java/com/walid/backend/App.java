@@ -319,16 +319,3 @@ scheduler.scheduleAtFixedRate(() -> {
 
 
 
-/*app.get("/api/ai/predict-sales/{productId}/{daysAhead}", ctx -> {
-            int productId = Integer.parseInt(ctx.pathParam("productId"));
-            int daysAhead = Integer.parseInt(ctx.pathParam("daysAhead"));
-            
-            SalesForecastAI aiModel = new SalesForecastAI();
-            double predictedSales = aiModel.predictSales(productId, daysAhead);
-            
-            ctx.json(Map.of(
-                "product_id", productId,
-                "days_ahead", daysAhead,
-                "predicted_sales", predictedSales
-            ));
-        });*/
