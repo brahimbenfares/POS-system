@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعادة الطلب الذكية</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <script src="AiJs/ai_reorder.js" defer></script>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+
+    <!-- Main Content -->
+    <div class="flex-1 p-10">
+        <h1 class="text-3xl font-bold mb-6">إعادة الطلب الذكية بواسطة الذكاء الاصطناعي</h1>
+
+        <!-- AI Reorder Table -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">منتجات بحاجة إلى إعادة الطلب</h2>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2 text-center">✔</th>
+                        <th class="border px-4 py-2">رقم المنتج</th>
+                        <th class="border px-4 py-2">اسم المنتج</th>
+                        <th class="border px-4 py-2">المخزون الحالي</th>
+                        <th class="border px-4 py-2">المبيعات المتوقعة</th>
+                        <th class="border px-4 py-2">كمية الطلب</th>
+                        <th class="border px-4 py-2">المورد</th>
+                    </tr>
+                </thead>
+                
+                <tbody id="reorderTable"></tbody>
+            </table>
+            <button class="bg-green-500 text-white px-4 py-2 mt-4 rounded" onclick="confirmReorders()">
+                ✅ تأكيد جميع الطلبات المختارة
+            </button>
+
+            <!-- Updated Reorder History Table -->
+            <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+                <h2 class="text-xl font-semibold mb-4">سجل إعادة الطلبات السابقة</h2>
+                <table class="w-full border-collapse border border-gray-300">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border px-4 py-2">رقم الطلب</th>
+                            <th class="border px-4 py-2">تاريخ الطلب</th>
+                            <th class="border px-4 py-2">عدد المنتجات المؤكدة</th>
+                            <th class="border px-4 py-2">عدد المنتجات الملغاة</th>
+                            <th class="border px-4 py-2">الحالة</th> <!-- ✅ NEW: Status Column -->
+                            <th class="border px-4 py-2">عرض التفاصيل</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reorderHistoryTable"></tbody>
+                </table>
+            </div>
+
+
+            
+        </div>
+    </div>
+    <script>
+        // Dynamically load the sidebar into the page
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("ai_sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+                })
+                .catch(error => console.error("Error loading sidebar:", error));
+        });
+
+</script>
+</body>
+</html>

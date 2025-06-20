@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Head Content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="css/sweetalert2.min.css">
+    
+    <!-- Removed Phosphor Icons CSS -->
+    <!-- <link rel="stylesheet" href="css/phosphor-icon.css"> -->
+    
+    <!-- Chart.js -->
+    <script src="js/chart.min.js"></script>
+    
+    <!-- Moment.js and Chart.js Adapter -->
+    <script src="js/moment.min.js"></script>
+    <script src="js/chartjs-adapter-moment.min.js"></script>
+    
+    <!-- FileSaver.js for Exporting -->
+    <script src="js/FileSaver.min.js"></script>
+    
+    <!-- PapaParse for CSV Export -->
+    <script src="js/papaparse.min.js"></script>
+    
+    <!-- SweetAlert2 JS -->
+    <script src="js/sweetalert2.min.js"></script>
+    
+    <!-- html2canvas for screenshots -->
+    <script src="js/html2canvas.min.js"></script>
+    
+    <!-- jsPDF for PDF export -->
+    <script src="js/jspdf.umd.min.js"></script>
+</head>
+
+<body class="flex bg-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex flex-col">
+            <div class="p-6">
+                <img src="img/HB solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+                <h2 class="text-center text-xl font-semibold">3008</h2>
+                <nav class="mt-8">
+                    <ul class="space-y-4">
+                        <li id="dashboardMenu">
+                            <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                            </a>
+                        </li>
+                        <li id="newSaleMenu">
+                            <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                            </a>
+                        </li>
+                        <li id="inventoryMenu">
+                            <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                            </a>
+                        </li>
+                        <li id="ordersMenu">
+                            <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                            </a>
+                        </li>
+                        <li id="suppliersMenu">
+                            <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                            </a>
+                        </li>
+                        <li id="customersMenu">
+                            <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                            </a>
+                        </li>
+                        <li id="adminAccessMenu">
+                            <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                            </a>
+                        </li>
+                        <li id="reportsMenu">
+                            <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                            </a>
+                        </li>
+                        <li>                 
+                            <button onclick="logout()"
+                                class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+                
+            </div>
+
+            
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">تفاصيل الطلب</h1>
+                <a href="orders2.html" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+                    العودة إلى الطلبات
+                </a>
+            </div>
+            <div id="orderInfo" class="mb-6">
+                <!-- سيتم عرض معلومات الطلب هنا -->
+            </div>
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <!-- Table Headers -->
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">معرف المنتج</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">اسم المنتج</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">الكمية</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">سعر البيع</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">الترويج</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">خصم الترويج (%)</th>
+                            <!-- Combine Additional Discount columns -->
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">خصم إضافي</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">قيمة الخصم</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">السعر النهائي</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody id="orderItemsBody" class="bg-white divide-y divide-gray-200">
+                        <!-- سيتم تعبئة عناصر الطلب هنا -->
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="js/logout.js"></script>
+
+    <!-- Include your script here -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+
+        if (orderId) {
+            fetchOrderDetails(orderId);
+        } else {
+            showAlert('No order ID provided.', 'error');
+        }
+
+
+        
+        const role = localStorage.getItem('adminRole'); // Retrieve role
+
+        // Adjust menu based on role
+        adjustMenuBasedOnRole(role);
+
+    });
+
+
+    function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+
+            if (role === 'owner') {
+                // Do nothing, show all menus
+            } else if (role === 'manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+        
+    function fetchOrderDetails(orderId) {
+        fetch(`http://localhost:8080/api/orders/${orderId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch order details.');
+            }
+            return response.json();
+        })
+        .then(order => {
+            displayOrderInfo(order);
+            displayOrderItems(order.orderItems, order.delivery);
+        })
+        .catch(error => {
+            console.error('Error fetching order details:', error);
+            showAlert('An error occurred while fetching order details.', 'error');
+        });
+    }
+
+    function displayOrderInfo(order) {
+        const orderInfoDiv = document.getElementById('orderInfo');
+        const orderDate = order.orderDate;
+        const orderTime = order.orderTime;
+        const status = order.action ? capitalizeFirstLetter(order.action) : 'N/A';
+        const deliveryFee = order.delivery || 0;
+
+        const orderId = order.orderID || order.orderId;
+
+        orderInfoDiv.innerHTML = `
+            <p><strong>Order ID:</strong> ${orderId}</p>
+            <p><strong>Date:</strong> ${orderDate}</p>
+            <p><strong>Time:</strong> ${orderTime}</p>
+            <p><strong>Status:</strong> ${status}</p>
+            <p><strong>Delivery Fee:</strong> ${deliveryFee.toFixed(2)} دج</p>
+        `;
+    }
+
+    function displayOrderItems(orderItems, deliveryFee) {
+        const tbody = document.getElementById('orderItemsBody');
+        tbody.innerHTML = '';
+
+        let totalAmount = 0;
+
+        orderItems.forEach(item => {
+            const row = document.createElement('tr');
+            row.classList.add('border-b');
+
+            const finalPrice = parseFloat(item.finalPrice);
+            totalAmount += finalPrice;
+
+            const promoDescription = item.promotionDescription || 'N/A';
+
+            // Corrected promotion discount percentage
+            const promoDiscountPercentage = (item.promoDiscountPercentage !== null && item.promoDiscountPercentage !== 0)
+                ? `${item.promoDiscountPercentage}%`
+                : 'N/A';
+
+            // Corrected additional discount information
+            let additionalDiscountInfo = 'N/A';
+            if (item.discountAmount !== null && item.discountAmount !== 0) {
+                additionalDiscountInfo = `${parseFloat(item.discountAmount).toFixed(2)} دج`;
+            } else if (item.discountPercentage !== null && item.discountPercentage !== 0) {
+                additionalDiscountInfo = `${item.discountPercentage}%`;
+            }
+
+            // Discount amount display
+            const discountAmountDisplay = (item.discountAmount !== null && item.discountAmount !== 0)
+                ? `${parseFloat(item.discountAmount).toFixed(2)} دج`
+                : 'N/A';
+
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${item.productId}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${item.productName}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${item.quantity}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${parseFloat(item.salesPrice).toFixed(2)} دج</td>
+                <td class="px-6 py-4 whitespace-nowrap">${promoDescription}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${promoDiscountPercentage}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${additionalDiscountInfo}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${discountAmountDisplay}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${finalPrice.toFixed(2)} دج</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // Add a row for total amount, including delivery fee
+        const totalRow = document.createElement('tr');
+        totalRow.innerHTML = `
+            <td colspan="8" class="px-6 py-4 text-right font-bold">Total Amount (incl. Delivery):</td>
+            <td class="px-6 py-4 font-bold">${(totalAmount + parseFloat(deliveryFee || 0)).toFixed(2)} دج</td>
+        `;
+        tbody.appendChild(totalRow);
+    }
+
+    function showAlert(message, type = 'success') {
+        Swal.fire({
+            icon: type === 'error' ? 'error' : 'success',
+            title: type === 'error' ? 'Error' : 'Success',
+            text: message,
+            timer: 3000,
+            showConfirmButton: false
+        });
+    }
+
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+</script>
+
+
+
+    
+</body>
+
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profit Tracking</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <script src="js/chart.min.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/chartjs-adapter-moment.min.js"></script>
+    <script src="js/FileSaver.min.js"></script>
+    <script src="js/html2canvas.min.js"></script>
+    <script src="js/jspdf.umd.min.js"></script>
+    <style>
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 300px;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .custom-alert.error {
+            background-color: #f44336;
+        }
+        .custom-alert.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+    <div id="customAlert" class="custom-alert"></div>
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex flex-col">
+            <div class="p-6">
+                <img src="img/HB solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+                <h2 class="text-center text-xl font-semibold">3008</h2>
+                <nav class="mt-8">
+                    <ul class="space-y-4">
+                        <li id="dashboardMenu">
+                            <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                            </a>
+                        </li>
+                        <li id="newSaleMenu">
+                            <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                            </a>
+                        </li>
+                        <li id="inventoryMenu">
+                            <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                            </a>
+                        </li>
+                        <li id="ordersMenu">
+                            <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                            </a>
+                        </li>
+                        <li id="suppliersMenu">
+                            <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                            </a>
+                        </li>
+                        <li id="customersMenu">
+                            <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                            </a>
+                        </li>
+                        <li id="adminAccessMenu">
+                            <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                            </a>
+                        </li>
+                        <li id="reportsMenu">
+                            <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                            </a>
+                        </li>
+
+                        <li>                 
+                            <button onclick="logout()"
+                                class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            
+        </aside>
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            <h1 class="text-3xl font-bold mb-6">تتبع الأرباح</h1>
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                    <img src="icons/dollar-sign.svg" alt="Total Profit Icon" class="w-8 h-8 text-green-500 mr-4">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-600">إجمالي الأرباح</h3>
+                        <p id="totalProfits" class="text-2xl font-bold"> دج 0.00</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                    <img src="icons/dollar-sign.svg" alt="Promotions Icon" class="w-8 h-8 text-orange-500 mr-4">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-600">إجمالي الخصومات الترويجية</h3>
+                        <p id="totalPromoDiscounts" class="text-2xl font-bold"> دج 0.00</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                    <img src="icons/dollar-sign.svg" alt="Checkout Discount Icon" class="w-8 h-8 text-red-500 mr-4">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-600">إجمالي الخصومات عند الدفع</h3>
+                        <p id="totalCheckoutDiscounts" class="text-2xl font-bold"> دج 0.00</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Filters Section -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block mb-2 font-medium">من تاريخ</label>
+                        <input type="date" id="fromDate" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block mb-2 font-medium">إلى تاريخ</label>
+                        <input type="date" id="toDate" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block mb-2 font-medium">المتجر</label>
+                        <select id="storeNumberDropdown" class="w-full px-4 py-2 border rounded-lg">
+                            <option value="">جميع المتاجر</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button onclick="applyFilters()" class="bg-blue-500 text-white px-4 py-2 rounded-lg">تطبيق الفلاتر</button>
+                </div>
+            </div>
+            <!-- Profit Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">الأرباح بمرور الوقت</h2>
+                <canvas id="profitChart" class="w-full h-96"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="js/logout.js"></script>
+
+
+
+<script>
+
+let allStoreNumbers = [];
+document.addEventListener('DOMContentLoaded', () => {
+    fetchStoreNumbers();
+    fetchProfitData();
+
+
+    const spinner = document.getElementById('loadingIndicator');
+    spinner.classList.remove('hidden'); // Show the spinner
+
+    const role = localStorage.getItem('adminRole'); // Retrieve role
+
+        // Adjust menu based on role
+        adjustMenuBasedOnRole(role);
+
+        // If role is not 'Owner' or 'Manager', redirect to 'newSale4.html'
+        if (role !== 'owner' && role !== 'manager') {
+            window.location.href = 'newSale4.html';
+            return;
+        }
+
+});
+
+async function fetchStoreNumbers() {
+    try {
+        const response = await fetch('http://localhost:8080/api/store-numbers');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const stores = await response.json();
+
+        const storeDropdown = document.getElementById('storeNumberDropdown');
+        storeDropdown.innerHTML = '<option value="">جميع المتاجر</option>'; // Reset options
+
+        stores.forEach(storeNumber => {
+            const option = document.createElement('option');
+            option.value = storeNumber; // Directly use the store number as the value
+            option.textContent = `Store ${storeNumber}`; // Use the store number for the text
+            storeDropdown.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error fetching store numbers:', error);
+    }
+}
+
+
+async function fetchProfitData() {
+    const fromDate = document.getElementById('fromDate').value || new Date().toISOString().slice(0, 10);
+    const toDate = document.getElementById('toDate').value || new Date().toISOString().slice(0, 10);
+    const storeNumber = document.getElementById('storeNumberDropdown').value;
+
+    const url = `http://localhost:8080/api/profit?startDate=${fromDate}&endDate=${toDate}${storeNumber ? `&storeNumber=${storeNumber}` : ''}`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        updateSummary(data);
+        renderProfitChart(data);
+    } catch (error) {
+        console.error('Error fetching profit data:', error);
+    }
+}
+
+
+function updateSummary(data) {
+    const totalProfit = data.reduce((sum, record) => sum + record.net_profit, 0);
+    const totalPromoDiscounts = data.reduce((sum, record) => sum + record.total_promo_discount, 0);
+    const totalCheckoutDiscounts = data.reduce((sum, record) => sum + record.total_additional_discount, 0);
+
+    document.getElementById('totalProfits').textContent = `دج ${totalProfit.toFixed(2)}`;
+    document.getElementById('totalPromoDiscounts').textContent = `دج ${totalPromoDiscounts.toFixed(2)}`;
+    document.getElementById('totalCheckoutDiscounts').textContent = `دج ${totalCheckoutDiscounts.toFixed(2)}`;
+}
+
+
+function renderProfitChart(data) {
+    const labels = data.map(record => new Date(record.order_date));
+    const profits = data.map(record => record.net_profit);
+
+    const ctx = document.getElementById('profitChart').getContext('2d');
+    if (window.profitChartInstance) {
+        window.profitChartInstance.destroy();
+    }
+    window.profitChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'صافي الربح',
+                data: profits,
+                borderColor: 'green',
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { 
+                    type: 'time', 
+                    time: { unit: 'day' },
+                    title: {
+                        display: true,
+                        text: 'تاريخ'
+                    }
+                },
+                y: { 
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'دج'
+                    }
+                },
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `دج ${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+function applyFilters() {
+    fetchProfitData();
+}
+
+
+function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+
+            if (role === 'Owner') {
+                // Do nothing, show all menus
+            } else if (role === 'Manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+    </script>
+</body>
+</html>

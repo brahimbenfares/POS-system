@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head Content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Role Assignment</title>
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="css/sweetalert2.min.css">
+    
+    
+    
+    <!-- Chart.js -->
+    <script src="js/chart.min.js"></script>
+    
+    <!-- Moment.js and Chart.js Adapter -->
+    <script src="js/moment.min.js"></script>
+    <script src="js/chartjs-adapter-moment.min.js"></script>
+    
+    <!-- FileSaver.js for Exporting -->
+    <script src="js/FileSaver.min.js"></script>
+    
+    <!-- PapaParse for CSV Export -->
+    <script src="js/papaparse.min.js"></script>
+    
+    <!-- SweetAlert2 JS -->
+    <script src="js/sweetalert2.min.js"></script>
+    
+    <!-- html2canvas for screenshots -->
+    <script src="js/html2canvas.min.js"></script>
+    
+    <!-- jsPDF for PDF export -->
+    <script src="js/jspdf.umd.min.js"></script>
+    
+    <!-- Custom Styles (if any) -->
+    <style>
+        /* Add any additional custom styles here */
+    </style>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex flex-col">
+            <div class="p-6">
+                <img src="img/HB solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+                <h2 class="text-center text-xl font-semibold">3008</h2>
+                <nav class="mt-8">
+                    <ul class="space-y-4">
+                        <li id="dashboardMenu">
+                            <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                            </a>
+                        </li>
+                        <li id="newSaleMenu">
+                            <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                            </a>
+                        </li>
+                        <li id="inventoryMenu">
+                            <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                            </a>
+                        </li>
+                        <li id="ordersMenu">
+                            <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                            </a>
+                        </li>
+                        <li id="suppliersMenu">
+                            <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                            </a>
+                        </li>
+                        <li id="customersMenu">
+                            <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                            </a>
+                        </li>
+                        <li id="adminAccessMenu">
+                            <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                            </a>
+                        </li>
+                        <li id="reportsMenu">
+                            <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                            </a>
+                        </li>
+                        <li>                 
+                            <button onclick="logout()"
+                                class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            <!-- Header with Action Button -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">صلاحيات الإدارة</h1>
+                <button onclick="openModal('assignRoleModal')" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+                    <img src="icons/user-plus.svg" alt="Create Admin Icon" class="w-6 h-6 mr-2" />إنشاء مشرف
+                </button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 mr-4">
+                            <img src="icons/users.svg" alt="Total Users Icon" class="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">إجمالي المستخدمين</h3>
+                            <p id="totalUsers" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 mr-4">
+                            <img src="icons/activity.svg" alt="Active Users Icon" class="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">المستخدمين النشطين</h3>
+                            <p id="activeUsers" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 mr-4">
+                            <img src="icons/user-plus.svg" alt="Admins Icon" class="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">المشرفين</h3>
+                            <p id="adminUsers" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Add more cards if needed -->
+            </div>
+
+            <!-- Tabs -->
+            <div class="mb-4 flex space-x-4">
+                <button onclick="filterUsers('all')" id="tabAll" class="bg-blue-500 text-white px-4 py-2 rounded-lg">جميع المستخدمين (0)</button>
+                <button onclick="filterUsers('active')" id="tabActive" class="bg-gray-200 px-4 py-2 rounded-lg">المستخدمين النشطين (0)</button>
+                <button onclick="filterUsers('admin')" id="tabAdmin" class="bg-gray-200 px-4 py-2 rounded-lg">المشرفين (0)</button>
+            </div>
+
+            <!-- User Table -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <!-- Table Headers -->
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">معرف المستخدم</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">اسم المستخدم</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">البريد الإلكتروني</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">الدور</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Table content will be dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modals -->
+            <!-- Assign Role Modal -->
+            <div id="assignRoleModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden" onclick="closeModal('assignRoleModal')">
+                <div class="bg-white rounded-lg w-1/2" onclick="event.stopPropagation();">
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-center border-b p-4">
+                        <h3 class="text-xl font-semibold">إنشاء مستخدم مشرف</h3>
+                        <button class="text-gray-600 hover:text-gray-800" onclick="closeModal('assignRoleModal')">&times;</button>
+                    </div>
+                    <!-- Modal Body -->
+                    <div class="p-4">
+                        <form id="assignRoleForm">
+                            <!-- Form Fields -->
+                            <div class="mb-4">
+                                <label class="block text-gray-700">اسم المستخدم</label>
+                                <input type="text" id="assignUsername" class="w-full border rounded px-3 py-2 mt-1" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">البريد الإلكتروني</label>
+                                <input type="email" id="assignEmail" class="w-full border rounded px-3 py-2 mt-1" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">كلمة المرور</label>
+                                <input type="password" id="assignPassword" class="w-full border rounded px-3 py-2 mt-1" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">الدور</label>
+                                <select id="assignUserRole" class="w-full border rounded px-3 py-2 mt-1" required>
+                                    <option value="owner">مشرف</option>
+                                    <option value="manager">مدير</option>
+                                    <option value="staff">موظف</option>
+                                </select>
+                            </div>
+                            <!-- Active status checkbox -->
+                            <div class="mb-4 flex items-center">
+                                <input type="checkbox" id="assignIsActive" class="mr-2" checked>
+                                <label class="block text-gray-700">نشط</label>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="flex justify-end border-t p-4">
+                        <button class="bg-gray-500 text-white px-4 py-2 rounded mr-2" onclick="closeModal('assignRoleModal')">إلغاء</button>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="handleAssignRoleSubmit()">إنشاء مشرف</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update User Modal -->
+            <div id="updateUserModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden" onclick="closeModal('updateUserModal')">
+                <div class="bg-white rounded-lg w-1/2" onclick="event.stopPropagation();">
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-center border-b p-4">
+                        <h3 class="text-xl font-semibold">تحديث مستخدم مشرف</h3>
+                        <button class="text-gray-600 hover:text-gray-800" onclick="closeModal('updateUserModal')">&times;</button>
+                    </div>
+                    <!-- Modal Body -->
+                    <div class="p-4">
+                        <form id="updateUserForm">
+                            <!-- Form Fields -->
+                            <input type="hidden" id="updateUserId">
+                            <div class="mb-4">
+                                <label class="block text-gray-700">اسم المستخدم</label>
+                                <input type="text" id="updateUsername" class="w-full border rounded px-3 py-2 mt-1" readonly>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">البريد الإلكتروني</label>
+                                <input type="email" id="updateEmail" class="w-full border rounded px-3 py-2 mt-1" readonly>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">الدور</label>
+                                <select id="updateUserRole" class="w-full border rounded px-3 py-2 mt-1" required>
+                                    <option value="owner">مشرف</option>
+                                    <option value="manager">مدير</option>
+                                    <option value="employee">موظف</option>
+                                </select>
+                            </div>
+                            <!-- Active status checkbox -->
+                            <div class="mb-4 flex items-center">
+                                <input type="checkbox" id="updateIsActive" class="mr-2">
+                                <label class="block text-gray-700">نشط</label>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="flex justify-end border-t p-4">
+                        <button class="bg-gray-500 text-white px-4 py-2 rounded mr-2" onclick="closeModal('updateUserModal')">إلغاء</button>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="handleUpdateUserSubmit()">تحديث المستخدم</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End of Modals -->
+        </div>
+    </div>
+
+            <script src="js/logout.js"></script>
+
+            <!-- Scripts -->
+            <script>
+                let users = []; // This will hold the fetched admin users
+                let currentFilter = 'all';
+
+                
+                // Initialize page
+                document.addEventListener('DOMContentLoaded', function () {
+                    
+            const role = localStorage.getItem('adminRole'); // Retrieve role
+
+            // Adjust menu based on role
+            adjustMenuBasedOnRole(role);
+
+            // If role is not 'Owner' or 'Manager', redirect to 'newSale4.html'
+            if (role !== 'owner' && role !== 'manager') {
+                window.location.href = 'newSale4.html';
+                return;
+            }
+
+
+                    // Apply role-based restrictions
+                    fetchUsers(); // Fetch users from backend
+                    setupEventListeners();
+                });
+
+                
+
+                
+                function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+
+            if (role === 'owner') {
+                // Do nothing, show all menus
+            } else if (role === 'manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+                // Fetch users from backend
+                function fetchUsers() {
+                    fetch('http://localhost:8080/api/admins')
+                        .then(response => response.json())
+                        .then(data => {
+                            users = data;
+                            updateUserDisplay();
+                            updateStatistics();
+                        })
+                        .catch(error => {
+                            console.error('Error fetching users:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while fetching users.',
+                            });
+                        });
+                }
+
+                // Update user display
+                function updateUserDisplay() {
+                    let filteredUsers = users.filter(user => {
+                        if (currentFilter === 'all') return true;
+                        if (currentFilter === 'active') return user.isActive;
+                        if (currentFilter === 'admin') return user.roleName === 'admin';
+                        return false;
+                    });
+
+                    const tbody = document.getElementById('userTableBody');
+                    tbody.innerHTML = '';
+
+                    filteredUsers.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.classList.add('border-b');
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap">${user.id}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${user.username}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${user.email}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${capitalizeFirstLetter(user.roleName)}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${user.isActive ? 'Active' : 'Inactive'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                <button onclick="editUser('${user.username}')" class="p-1 rounded hover:bg-gray-200">
+                                    <img src="icons/edit.svg" alt="Edit Icon" class="w-5 h-5">
+                                </button>
+                                <button onclick="deleteUser('${user.username}')" class="p-1 rounded hover:bg-gray-200">
+                                    <img src="icons/trash-2.svg" alt="Edit Icon" class="w-5 h-5">
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+
+                // Update statistics
+                function updateStatistics() {
+                    const totalUsers = users.length;
+                    const activeUsers = users.filter(u => u.isActive).length;
+                    const adminUsers = users.filter(u => u.roleName === 'admin').length;
+
+                    document.getElementById('totalUsers').textContent = totalUsers;
+                    document.getElementById('activeUsers').textContent = activeUsers;
+                    document.getElementById('adminUsers').textContent = adminUsers;
+
+                    // Update tab counts
+                    document.getElementById('tabAll').textContent = `All Users (${totalUsers})`;
+                    document.getElementById('tabActive').textContent = `Active Users (${activeUsers})`;
+                    document.getElementById('tabAdmin').textContent = `Admins (${adminUsers})`;
+                }
+
+                // Setup event listeners
+                function setupEventListeners() {
+                    // Add event listeners for tabs
+                    document.getElementById('tabAll').addEventListener('click', () => { setActiveTab('tabAll'); filterUsers('all'); });
+                    document.getElementById('tabActive').addEventListener('click', () => { setActiveTab('tabActive'); filterUsers('active'); });
+                    document.getElementById('tabAdmin').addEventListener('click', () => { setActiveTab('tabAdmin'); filterUsers('admin'); });
+                }
+
+                function setActiveTab(tabId) {
+                    document.querySelectorAll('.mb-4 .flex button').forEach(btn => {
+                        btn.classList.remove('bg-blue-500', 'text-white');
+                        btn.classList.add('bg-gray-200');
+                    });
+                    document.getElementById(tabId).classList.add('bg-blue-500', 'text-white');
+                    document.getElementById(tabId).classList.remove('bg-gray-200');
+                }
+
+                // Filter users based on status
+                function filterUsers(filter) {
+                    currentFilter = filter;
+                    updateUserDisplay();
+                }
+
+                // Capitalize first letter of a string
+                function capitalizeFirstLetter(string) {
+                    return string.charAt(0).toUpperCase() + string.slice(1);
+                }
+
+                // Modal Functions
+                function openModal(modalId) {
+                    document.getElementById(modalId).classList.remove('hidden');
+                }
+
+                function closeModal(modalId) {
+                    document.getElementById(modalId).classList.add('hidden');
+                }
+
+                // Handle Assign Role Form Submit (Create Admin)
+                function handleAssignRoleSubmit() {
+                    const username = document.getElementById('assignUsername').value;
+                    const email = document.getElementById('assignEmail').value;
+                    const password = document.getElementById('assignPassword').value;
+                    const roleName = document.getElementById('assignUserRole').value;
+                    const isActive = document.getElementById('assignIsActive').checked;
+
+                    const newAdmin = {
+                        username,
+                        email,
+                        password,
+                        roleName,
+                        isActive // Corrected field name
+                    };
+
+                    fetch('http://localhost:8080/api/admin/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newAdmin)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Admin user created successfully.',
+                            });
+                            // Fetch users again to get the updated list
+                            fetchUsers();
+                            closeModal('assignRoleModal');
+                            document.getElementById('assignRoleForm').reset();
+                        } else {
+                            response.text().then(text => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Failed to create admin user: ' + text,
+                                });
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error creating admin user:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while creating the admin user.',
+                        });
+                    });
+                }
+
+                // Handle Update User Form Submit
+                async function handleUpdateUserSubmit() {
+                    const userId = document.getElementById('updateUserId').value;
+                    const username = document.getElementById('updateUsername').value;
+                    const email = document.getElementById('updateEmail').value;
+                    const roleName = document.getElementById('updateUserRole').value;
+                    const isActive = document.getElementById('updateIsActive').checked;
+
+                    const updatedAdmin = {
+                        id: userId,
+                        username: username,
+                        email: email,
+                        roleName: roleName,
+                        isActive: isActive // Ensure correct field name matches the DTO
+                    };
+
+                    try {
+                        const response = await fetch('http://localhost:8080/api/admin/update', {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(updatedAdmin)
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: data.message,
+                            });
+                            fetchUsers(); // Refresh user list
+                            closeModal('updateUserModal');
+                        } else {
+                            const error = await response.json();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: `Error: ${error.message}`,
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error updating user:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating the user.',
+                        });
+                    }
+                }
+
+                // Edit User Function
+                function editUser(username) {
+                    const user = users.find(u => u.username === username);
+                    if (user) {
+                        document.getElementById('updateUserId').value = user.id;
+                        document.getElementById('updateUsername').value = user.username;
+                        document.getElementById('updateEmail').value = user.email;
+                        document.getElementById('updateUserRole').value = user.roleName;
+                        document.getElementById('updateIsActive').checked = user.isActive;
+                        openModal('updateUserModal');
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'User not found.',
+                        });
+                    }
+                }
+
+                // Delete User Function
+                function deleteUser(username) {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Do you really want to delete this user?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`http://localhost:8080/api/admin/delete?username=${encodeURIComponent(username)}`, {
+                                method: 'DELETE'
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'User has been deleted.',
+                                        'success'
+                                    );
+                                    // Remove the user from the array and update the display
+                                    users = users.filter(u => u.username !== username);
+                                    updateUserDisplay();
+                                    updateStatistics();
+                                } else {
+                                    response.text().then(text => {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: 'Failed to delete user: ' + text,
+                                        });
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error deleting user:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred while deleting the user.',
+                                });
+                            });
+                        }
+                    });
+                }
+
+                // Function to show alerts using SweetAlert2
+                function showAlert(message, type = 'success') {
+                    Swal.fire({
+                        icon: type === 'error' ? 'error' : 'success',
+                        title: type === 'error' ? 'Error' : 'Success',
+                        text: message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            </script>
+        </div>
+    </div>
+</body>
+</html>

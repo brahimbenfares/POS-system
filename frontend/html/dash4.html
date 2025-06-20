@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta Tags and Title -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Inventory Management</title>
+   
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    
+    <!-- Chart.js -->
+    <script src="js/chart.min.js" defer></script>
+    
+    <!-- Moment.js and Chart.js Adapter -->
+    <script src="js/moment.min.js" defer></script>
+    <script src="js/chartjs-adapter-moment.min.js" defer></script>
+    
+    <!-- FileSaver.js for Exporting -->
+    <script src="js/FileSaver.min.js" defer></script>
+    
+    <!-- PapaParse for CSV Export -->
+    <script src="js/papaparse.min.js" defer></script>
+    
+    <!-- html2canvas for screenshots -->
+    <script src="js/html2canvas.min.js" defer></script>
+    
+    <!-- jsPDF for PDF export -->
+    <script src="js/jspdf.umd.min.js" defer></script>
+    
+</head>
+<style>
+    /* Simple spinner style */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader {
+    border: 8px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #4a90e2;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    animation: spin 1s linear infinite;
+}
+
+
+</style>
+<body class="flex bg-gray-100 min-h-screen">
+    <!-- Custom Alert -->
+
+    <div id="loadingIndicator" class="fixed inset-0 flex justify-center items-center bg-white bg-opacity-75 z-50">
+        <div class="text-center">
+            <div class="loader">Loading...</div>
+        </div>
+    </div>
+
+    <div id="customAlert" class="fixed inset-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-sm p-4 bg-green-500 text-white text-center text-lg rounded-lg shadow-lg z-50 opacity-0 invisible transition-opacity duration-300"></div>
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex flex-col">
+            <div class="p-6">
+                <img src="img/HB solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+                <h2 class="text-center text-xl font-semibold">3008</h2>
+                <nav class="mt-8">
+                    <ul class="space-y-4">
+                        <li id="dashboardMenu">
+                            <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                            </a>
+                        </li>
+                        <li id="newSaleMenu">
+                            <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                            </a>
+                        </li>
+                        <li id="inventoryMenu">
+                            <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                            </a>
+                        </li>
+                        <li id="ordersMenu">
+                            <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                            </a>
+                        </li>
+                        <li id="suppliersMenu">
+                            <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                            </a>
+                        </li>
+                        <li id="customersMenu">
+                            <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                            </a>
+                        </li>
+                        <li id="adminAccessMenu">
+                            <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                            </a>
+                        </li>
+                        <li id="reportsMenu">
+                            <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="ai_dashboard.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الذكاء الاصطناعي - لوحة التحكم
+
+                            </a>
+                        </li>
+                        <li>                 
+                            <button onclick="logout()"
+                                class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            <!-- Header with Bigger Action Buttons -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <button onclick="redirectToNewSale()"
+                    class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-4 px-6 rounded-lg flex items-center justify-center space-x-2">
+                    <img src="icons/shopping-cart.svg" alt="New Order Icon" class="w-6 h-6" />
+                    <span>طلب جديد</span>
+                </button>
+                <button data-modal-target="newCustomerModal"
+                        class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-4 px-6 rounded-lg flex items-center justify-center space-x-2">
+                    <img src="icons/user-plus.svg" alt="New Customer Icon" class="w-6 h-6" />
+                    <span>عميل جديد</span>
+                </button>
+
+                <button data-modal-target="newSupplierModal"
+                        class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-4 px-6 rounded-lg flex items-center justify-center space-x-2">
+                    <img src="icons/truck.svg" alt="New Supplier Icon" class="w-6 h-6" />
+                    <span>مورد جديد</span>
+                </button>
+
+                <button data-modal-target="newItemModal"
+                    class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-4 px-6 rounded-lg flex items-center justify-center space-x-2">
+                    <img src="icons/archive.svg" alt="New Item Icon" class="w-6 h-6" />
+                    <span>منتج جديد</span>
+                </button>
+            </div>
+
+            <!-- Store Number Dropdown -->
+            <div class="mb-4">
+                <label for="storeNumberDropdown" class="block text-lg font-medium text-gray-700 mb-2">اختر المتجر</label>
+                <select id="storeNumberDropdown"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">جميع المتاجر</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Revenue Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold">مبيعات اليوم</h3>
+                    <p id="todaySales" class="text-2xl font-bold mt-2">  0.00 دج  </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold">مبيعات الأسبوع</h3>
+                    <p id="weekSales" class="text-2xl font-bold mt-2">  0.00 دج  </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold">مبيعات الشهر</h3>
+                    <p id="monthSales" class="text-2xl font-bold mt-2">  0.00 دج  </p>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="hidden flex justify-center items-center mb-4">
+                <p class="text-gray-500">جاري التحميل...</p>
+            </div>
+
+            <!-- Recent Transactions & Low Stock Alerts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Recent Transactions -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">المعاملات الأخيرة</h3>
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="text-left text-gray-500 py-2">رقم الطلب</th>
+                                <th class="text-left text-gray-500 py-2">التاريخ</th>
+                                <th class="text-left text-gray-500 py-2">الإجمالي</th>
+                                <th class="text-left text-gray-500 py-2">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTransactionsBody">
+                            <!-- Dynamic rows will be inserted here -->
+                        </tbody>
+                    </table>
+                    <!-- Pagination Controls -->
+                    <div id="paginationControls" class="mt-4 flex justify-center space-x-2">
+                        <button id="prevPage"
+                            class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>السابق</button>
+                        <span id="currentPage" class="px-3 py-1">1</span>
+                        <button id="nextPage"
+                            class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>التالي</button>
+                    </div>
+                </div>
+
+                <!-- Low Stock Alerts -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold mb-4">تنبيهات المخزون المنخفض</h3>
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="text-left text-gray-500 py-2">اسم المنتج</th>
+                                <th class="text-left text-gray-500 py-2">الكمية المتبقية</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lowStockBody">
+                            <!-- Dynamic rows will be inserted here -->
+                        </tbody>
+                    </table>
+                    <!-- Pagination Controls -->
+                    <div id="lowStockPaginationControls" class="mt-4 flex justify-center space-x-2">
+                        <button id="prevLowStockPage"
+                            class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>السابق</button>
+                        <span id="currentLowStockPage" class="px-3 py-1">1</span>
+                        <button id="nextLowStockPage"
+                            class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>التالي</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales/Revenue Chart with Time Filter -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">مخطط المبيعات/الإيرادات</h3>
+                    <select id="timeFilter"
+                        class="mt-2 md:mt-0 border border-gray-300 rounded-md px-4 py-2">
+                        <option value="daily">يومي</option>
+                        <option value="weekly">أسبوعي</option>
+                        <option value="monthly" selected>شهري</option>
+                    </select>
+                </div>
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- New Customer Modal -->
+    <!-- New Customer Modal -->
+<div id="newCustomerModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg w-full max-w-lg max-h-full overflow-y-auto mx-4">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center border-b p-4">
+            <h3 class="text-xl font-semibold">عميل جديد</h3>
+            <button class="text-gray-600 hover:text-gray-800" onclick="closeModal('newCustomerModal')" aria-label="Close Modal">
+                <span class="text-red-500 text-2xl font-bold">&times;</span>
+            </button>
+        </div>
+        <!-- Modal Body -->
+        <div class="p-4">
+
+                <form id="newCustomerForm">
+                    <div class="mb-4">
+                        <label for="firstName" class="block text-gray-700">الاسم الأول<span class="text-red-500">*</span></label>
+                        <input type="text" id="firstName" name="firstName"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل الاسم الأول" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="lastName" class="block text-gray-700">الاسم الأخير<span class="text-red-500">*</span></label>
+                        <input type="text" id="lastName" name="lastName"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل الاسم الأخير" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="phoneNumber" class="block text-gray-700">رقم الهاتف<span class="text-red-500">*</span></label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل رقم الهاتف" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="totalPurchases" class="block text-gray-700">إجمالي المشتريات</label>
+                        <input type="number" id="totalPurchases" name="totalPurchases"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="mb-4">
+                        <label for="loyaltyPoints" class="block text-gray-700">نقاط الولاء</label>
+                        <input type="number" id="loyaltyPoints" name="loyaltyPoints"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="0">
+                    </div>
+                    <div class="mb-4">
+                        <label for="loyaltyStatus" class="block text-gray-700">حالة الولاء</label>
+                        <input type="text" id="loyaltyStatus" name="loyaltyStatus"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="نشط">
+                    </div>
+                    <div class="mb-4">
+                        <label for="notes" class="block text-gray-700">ملاحظات</label>
+                        <textarea id="notes" name="notes"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أضف ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+                   <!-- Modal Footer -->
+        <div class="flex justify-end space-x-2 p-4 border-t">
+            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onclick="addCustomer()">حفظ العميل</button>
+            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    onclick="closeModal('newCustomerModal')">إلغاء</button>
+        </div>
+
+        </div>
+    </div>
+    <!-- End of New Customer Modal -->
+
+    <!-- New Supplier Modal -->
+<div id="newSupplierModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg w-full max-w-lg max-h-full overflow-y-auto mx-4">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center border-b p-4">
+            <h3 class="text-xl font-semibold">مورد جديد</h3>
+            <button class="text-gray-600 hover:text-gray-800" onclick="closeModal('newSupplierModal')" aria-label="Close Modal">
+                <span class="text-red-500 text-2xl font-bold">&times;</span>
+            </button>
+        </div>
+        <!-- Modal Body -->
+        <div class="p-4">
+
+                <form id="newSupplierForm">
+                    <div class="mb-4">
+                        <label for="supplierName" class="block text-gray-700">اسم المورد<span class="text-red-500">*</span></label>
+                        <input type="text" id="supplierName" name="supplierName"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل اسم المورد" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="contactPerson" class="block text-gray-700">اسم جهة الاتصال<span class="text-red-500">*</span></label>
+                        <input type="text" id="contactPerson" name="contactPerson"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل اسم جهة الاتصال" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="supplierPhoneNumber" class="block text-gray-700">رقم الهاتف<span class="text-red-500">*</span></label>
+                        <input type="tel" id="supplierPhoneNumber" name="supplierPhoneNumber"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل رقم الهاتف" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="email" class="block text-gray-700">البريد الإلكتروني<span class="text-red-500">*</span></label>
+                        <input type="email" id="email" name="email"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل البريد الإلكتروني" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="totalAmountPaid" class="block text-gray-700">إجمالي المبلغ المدفوع</label>
+                        <input type="number" id="totalAmountPaid" name="totalAmountPaid"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="mb-4">
+                        <label for="status" class="block text-gray-700">الحالة</label>
+                        <input type="text" id="status" name="status"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="نشط">
+                    </div>
+                    <div class="mb-4">
+                        <label for="supplierNotes" class="block text-gray-700">ملاحظات</label>
+                        <textarea id="supplierNotes" name="supplierNotes"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أضف ملاحظات..."></textarea>
+                    </div>
+                </form>
+            </div>
+                   <!-- Modal Footer -->
+        <div class="flex justify-end space-x-2 p-4 border-t">
+            <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onclick="addSupplier()">حفظ المورد</button>
+            <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    onclick="closeModal('newSupplierModal')">إلغاء</button>
+        </div>
+
+        </div>
+    </div>
+    <!-- End of New Supplier Modal -->
+
+    <!-- New Item Modal -->
+    <div id="newItemModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg w-full max-w-lg max-h-full overflow-y-auto mx-4">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">منتج جديد</h3>
+                <button class="text-gray-600 hover:text-gray-800" onclick="closeModal('newItemModal')" aria-label="Close Modal">
+                    <span class="text-red-500 text-2xl font-bold">&times;</span>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-4">
+                <form id="productForm">
+                    <!-- Add your form fields here using Tailwind classes -->
+                    <!-- Example: -->
+                    <div class="mb-4">
+                        <label for="productName" class="block text-gray-700">اسم المنتج<span class="text-red-500">*</span></label>
+                        <input type="text" id="productName" name="productName"
+                            class="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="أدخل اسم المنتج" required>
+                    </div>
+                    <!-- Add other fields similarly -->
+                </form>
+            </div>
+            <!-- Modal Footer -->
+            <div class="flex justify-end space-x-2 p-4 border-t">
+                <button type="button"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onclick="handleProductSubmit()">حفظ المنتج</button>
+                <button type="button"
+                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    onclick="closeModal('newItemModal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+    <!-- End of New Item Modal -->
+
+
+    <script src="js/logout.js" defer></script>
+
+    <!-- JavaScript Section -->
+    <script>
+        // JavaScript Section
+
+        // Variables for Recent Transactions Pagination
+        let currentPageNumber = 1;
+        const pageSize = 5; // Number of orders per page
+        let todayOrders = []; // Will hold all fetched orders
+
+        // Variables for Low Stock Alerts Pagination
+        let lowStockCurrentPageNumber = 1;
+        const lowStockPageSize = 5; // Number of low-stock items per page
+        let lowStockItems = []; // Will hold all low-stock products
+
+        // Initialize Chart.js Chart
+        let salesChart;
+        let allStoreNumbers = [];
+
+        // Ensure all functions run only after the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', async function () {
+    const spinner = document.getElementById('loadingIndicator');
+    spinner.classList.remove('hidden'); // Show the spinner
+
+            const role = localStorage.getItem('adminRole'); // Retrieve role
+
+        // Adjust menu based on role
+        adjustMenuBasedOnRole(role);
+
+        // If role is not 'Owner' or 'Manager', redirect to 'newSale4.html'
+        if (role !== 'owner' && role !== 'manager') {
+            window.location.href = 'newSale4.html';
+            return;
+        }
+
+        // Attach event listeners based on data-modal-target attributes
+        document.querySelectorAll('[data-modal-target]').forEach(button => {
+        const modalId = button.getAttribute('data-modal-target');
+        button.addEventListener('click', () => openModal(modalId));
+    });
+
+    // Attach event listeners for closing modals by clicking on the overlay
+    document.querySelectorAll('.fixed').forEach(modal => {
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+
+    // Close modals on Escape key press
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.fixed').forEach((modal) => {
+                if (!modal.classList.contains('hidden')) {
+                    closeModal(modal.id);
+                }
+            });
+        }
+    });
+
+
+    await loadData();
+    setupEventListeners(); // Call this to attach event listeners, including for timeFilter
+    spinner.classList.add('hidden');
+
+});
+
+
+
+function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+            const AI = document.getElementById('AI');
+
+
+            if (role === 'owner') {
+                // Do nothing, show all menus
+            } else if (role === 'manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+                if (AI) AI.style.display='none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+
+
+
+
+async function loadData() {
+    try {
+        // Wait for all fetches to complete
+        await Promise.all([
+            fetchAndPopulateSuppliers(),
+            fetchSalesSummary(),
+            fetchTodayOrders(),
+            fetchLowStockItems(),
+            initializeChart(),
+            fetchAllStoreNumbers(),
+        ]);
+    } catch (error) {
+        console.error("An error occurred while loading data:", error);
+        showAlert("Failed to load some data. Please try again later.", "error");
+    }
+}
+
+
+       
+
+        // Function to fetch and populate store numbers
+        async function fetchAllStoreNumbers() {
+            try {
+                const response = await fetch('http://localhost:8080/api/store-numbers');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                allStoreNumbers = await response.json();
+                populateStoreNumberDropdown(allStoreNumbers);
+
+                // Fetch initial data after store numbers are loaded
+                const selectedStoreNumber = document.getElementById('storeNumberDropdown').value;
+                fetchSalesSummary(selectedStoreNumber);
+                fetchTodayOrders(selectedStoreNumber);
+                fetchLowStockItems(selectedStoreNumber);
+                initializeChart(selectedStoreNumber);
+            } catch (error) {
+                console.error('Error fetching store numbers:', error);
+                showAlert('Failed to load store numbers. Please try again later.', 'error');
+            }
+        }
+
+        // Function to populate the store number dropdown
+        function populateStoreNumberDropdown(storeNumbers) {
+            const dropdown = document.getElementById('storeNumberDropdown');
+            dropdown.innerHTML = '<option value="">All Stores</option>'; // Reset options
+
+            storeNumbers.forEach(storeNumber => {
+                const option = document.createElement('option');
+                option.value = storeNumber;
+                option.textContent = `Store ${storeNumber}`;
+                dropdown.appendChild(option);
+            });
+
+            // Add event listener for store selection
+            dropdown.addEventListener('change', () => {
+                const selectedStoreNumber = dropdown.value;
+                // Update all data based on the selected store
+                fetchSalesSummary(selectedStoreNumber);
+                fetchTodayOrders(selectedStoreNumber);
+                fetchLowStockItems(selectedStoreNumber);
+                updateChart(selectedStoreNumber);
+            });
+        }
+
+        async function fetchSalesSummary(storeNumber = '') {
+    storeNumber = encodeURIComponent(storeNumber);
+    try {
+        const response = await fetch(`http://localhost:8080/api/sales-summary?storeNumber=${storeNumber}`);
+        if (!response.ok) throw new Error(`Failed to load sales summary`);
+        const data = await response.json();
+        document.getElementById('todaySales').textContent = `${data.todaySales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} دج`;
+        document.getElementById('weekSales').textContent = `${data.weekSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} دج`;
+        document.getElementById('monthSales').textContent = `${data.monthSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} دج`;
+    } catch (error) {
+        console.error('Error fetching sales summary:', error);
+        throw error; // Let Promise.all handle this error
+    }
+}
+
+
+async function fetchTodayOrders(storeNumber = '') {
+    try {
+        document.getElementById('loadingIndicator').classList.remove('hidden');
+        const response = await fetch(`http://localhost:8080/api/today-orders?storeNumber=${storeNumber}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        todayOrders = await response.json();
+
+        // Initialize pagination
+        currentPageNumber = 1;
+        displayOrdersPage(currentPageNumber);
+        updatePaginationControls();
+    } catch (error) {
+        console.error('Error fetching today\'s orders:', error);
+        showAlert('Failed to load today\'s orders. Please try again later.', 'error');
+    } finally {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+    }
+}
+
+function displayOrdersPage(pageNumber) {
+    const tbody = document.getElementById('recentTransactionsBody');
+    tbody.innerHTML = ''; // Clear existing rows
+
+    const startIndex = (pageNumber - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, todayOrders.length);
+    const ordersToDisplay = todayOrders.slice(startIndex, endIndex);
+
+    ordersToDisplay.forEach(order => {
+        const tr = document.createElement('tr');
+        tr.classList.add('border-t');
+
+        // Order ID
+        const tdOrderId = document.createElement('td');
+        tdOrderId.classList.add('py-2');
+        tdOrderId.textContent = order.orderId;
+        tr.appendChild(tdOrderId);
+
+        // Date
+        const tdDate = document.createElement('td');
+        tdDate.classList.add('py-2');
+        tdDate.textContent = order.orderDateTime;
+        tr.appendChild(tdDate);
+
+        // Total with "دج" symbol
+        const tdTotal = document.createElement('td');
+        tdTotal.classList.add('py-2');
+        tdTotal.textContent = `${order.totalPrice.toLocaleString('ar-DZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} دج`;
+        tr.appendChild(tdTotal);
+
+        // Status
+        const tdStatus = document.createElement('td');
+        tdStatus.classList.add('py-2');
+
+        const statusSpan = document.createElement('span');
+        statusSpan.classList.add('px-2', 'py-1', 'rounded-lg');
+        if (order.status.toLowerCase() === 'completed') {
+            statusSpan.classList.add('bg-green-100', 'text-green-600');
+        } else if (order.status.toLowerCase() === 'pending') {
+            statusSpan.classList.add('bg-yellow-100', 'text-yellow-600');
+        } else if (order.status.toLowerCase() === 'cancelled') {
+            statusSpan.classList.add('bg-red-100', 'text-red-600');
+        } else {
+            statusSpan.classList.add('bg-gray-100', 'text-gray-600');
+        }
+        statusSpan.textContent = capitalizeFirstLetter(order.status);
+        tdStatus.appendChild(statusSpan);
+        tr.appendChild(tdStatus);
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+        // Function to update pagination controls for Recent Transactions
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(todayOrders.length / pageSize);
+            document.getElementById('currentPage').textContent = currentPageNumber;
+
+            // Disable/Enable Previous button
+            const prevButton = document.getElementById('prevPage');
+            if (currentPageNumber === 1) {
+                prevButton.disabled = true;
+            } else {
+                prevButton.disabled = false;
+            }
+
+            // Disable/Enable Next button
+            const nextButton = document.getElementById('nextPage');
+            if (currentPageNumber === totalPages || totalPages === 0) {
+                nextButton.disabled = true;
+            } else {
+                nextButton.disabled = false;
+            }
+        }
+
+        async function fetchLowStockItems(storeNumber = '') {
+            try {
+                const response = await fetch(`http://localhost:8080/api/low-stock-items?storeNumber=${storeNumber}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                lowStockItems = await response.json();
+
+                // Initialize pagination
+                lowStockCurrentPageNumber = 1;
+                displayLowStockPage(lowStockCurrentPageNumber);
+                updateLowStockPaginationControls();
+            } catch (error) {
+                console.error('Error fetching low-stock items:', error);
+                showAlert('Failed to load low-stock items. Please try again later.', 'error');
+            }
+        }
+
+        // Function to display a specific page of low-stock items
+        function displayLowStockPage(pageNumber) {
+            const tbody = document.getElementById('lowStockBody');
+            tbody.innerHTML = ''; // Clear existing rows
+
+            const startIndex = (pageNumber - 1) * lowStockPageSize;
+            const endIndex = Math.min(startIndex + lowStockPageSize, lowStockItems.length);
+            const itemsToDisplay = lowStockItems.slice(startIndex, endIndex);
+
+            itemsToDisplay.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.classList.add('border-t');
+
+                // Product Name
+                const tdName = document.createElement('td');
+                tdName.classList.add('py-2');
+                tdName.textContent = item.name;
+                tr.appendChild(tdName);
+
+                // Quantity Left
+                const tdQuantity = document.createElement('td');
+                tdQuantity.classList.add('py-2');
+
+                const quantitySpan = document.createElement('span');
+                quantitySpan.classList.add('px-2', 'py-1', 'rounded-lg');
+                if (item.quantity < 5) {
+                    quantitySpan.classList.add('bg-red-100', 'text-red-600');
+                } else if (item.quantity < 15) {
+                    quantitySpan.classList.add('bg-yellow-100', 'text-yellow-600');
+                }
+                quantitySpan.textContent = `${item.quantity} left`;
+                tdQuantity.appendChild(quantitySpan);
+                tr.appendChild(tdQuantity);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Function to update pagination controls for Low Stock Alerts
+        function updateLowStockPaginationControls() {
+            const totalPages = Math.ceil(lowStockItems.length / lowStockPageSize);
+            document.getElementById('currentLowStockPage').textContent = lowStockCurrentPageNumber;
+
+            // Disable/Enable Previous button
+            const prevButton = document.getElementById('prevLowStockPage');
+            if (lowStockCurrentPageNumber === 1) {
+                prevButton.disabled = true;
+            } else {
+                prevButton.disabled = false;
+            }
+
+            // Disable/Enable Next button
+            const nextButton = document.getElementById('nextLowStockPage');
+            if (lowStockCurrentPageNumber === totalPages || totalPages === 0) {
+                nextButton.disabled = true;
+            } else {
+                nextButton.disabled = false;
+            }
+        }
+
+        // Event listeners for pagination buttons
+        function setupEventListeners() {
+            // Attach event listeners based on data-modal-target attributes
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                const modalId = button.getAttribute('data-modal-target');
+                button.addEventListener('click', () => openModal(modalId));
+            });
+
+            // Attach event listeners for closing modals by clicking on the overlay
+            document.querySelectorAll('.modal').forEach((modal) => {
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModal(modal.id);
+                    }
+                });
+            });
+
+            // Close modals on Escape key press
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    // Close all open modals
+                    document.querySelectorAll('.fixed').forEach((modal) => {
+                        if (!modal.classList.contains('hidden')) {
+                            closeModal(modal.id);
+                        }
+                    });
+                }
+            });
+
+            // Attach event listener for the time filter dropdown
+            const timeFilter = document.getElementById('timeFilter');
+            if (timeFilter) {
+                timeFilter.addEventListener('change', () => {
+                    const selectedStoreNumber = document.getElementById('storeNumberDropdown').value;
+                    updateChart(selectedStoreNumber);
+                });
+            }
+
+            // Pagination Buttons for Recent Transactions
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+
+            prevButton.addEventListener('click', () => {
+                if (currentPageNumber > 1) {
+                    currentPageNumber--;
+                    displayOrdersPage(currentPageNumber);
+                    updatePaginationControls();
+                }
+            });
+
+            nextButton.addEventListener('click', () => {
+                const totalPages = Math.ceil(todayOrders.length / pageSize);
+                if (currentPageNumber < totalPages) {
+                    currentPageNumber++;
+                    displayOrdersPage(currentPageNumber);
+                    updatePaginationControls();
+                }
+            });
+
+            // Pagination Buttons for Low Stock Alerts
+            const prevLowStockButton = document.getElementById('prevLowStockPage');
+            const nextLowStockButton = document.getElementById('nextLowStockPage');
+
+            prevLowStockButton.addEventListener('click', () => {
+                if (lowStockCurrentPageNumber > 1) {
+                    lowStockCurrentPageNumber--;
+                    displayLowStockPage(lowStockCurrentPageNumber);
+                    updateLowStockPaginationControls();
+                }
+            });
+
+            nextLowStockButton.addEventListener('click', () => {
+                const totalPages = Math.ceil(lowStockItems.length / lowStockPageSize);
+                if (lowStockCurrentPageNumber < totalPages) {
+                    lowStockCurrentPageNumber++;
+                    displayLowStockPage(lowStockCurrentPageNumber);
+                    updateLowStockPaginationControls();
+                }
+            });
+        }
+
+        // Helper function to capitalize the first letter of a string
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+ // Open Modal Function
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden'); // Prevent background scrolling
+    } else {
+        console.error(`Modal with ID ${modalId} not found.`);
+    }
+}
+
+// Close Modal Function
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden'); // Re-enable background scrolling
+    } else {
+        console.error(`Modal with ID ${modalId} not found.`);
+    }
+}
+
+
+        // Helper function to get input values
+        function getInputValue(id) {
+            const input = document.getElementById(id);
+            if (input) {
+                return input.value.trim();
+            } else {
+                console.warn(`Input with ID ${id} not found.`);
+                return '';
+            }
+        }
+
+        // Fetch suppliers from the API and populate the supplier dropdown
+        async function fetchAndPopulateSuppliers() {
+            try {
+                const response = await fetch('http://localhost:8080/api/suppliers');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const suppliers = await response.json();
+
+                // Assuming you only need this data for the New Supplier Modal
+                const supplierDropdown = document.getElementById('supplierDropdownInNewSupplierModal'); // Adjust the ID as needed
+                if (supplierDropdown) {
+                    supplierDropdown.innerHTML = '<option value="">Select supplier...</option>';
+                    suppliers.forEach(supplier => {
+                        const option = document.createElement('option');
+                        option.value = supplier.vendor;
+                        option.textContent = `${supplier.vendor} - ${supplier.contactPerson || 'N/A'}`;
+                        supplierDropdown.appendChild(option);
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error fetching suppliers:', error);
+                showAlert('Failed to load suppliers. Please try again later.', 'error');
+            }
+        }
+
+        // Add Supplier Function
+        async function addSupplier() {
+            const supplierData = {
+                supplierName: getInputValue('supplierName'),
+                contactPerson: getInputValue('contactPerson'),
+                phoneNumber: getInputValue('supplierPhoneNumber') || 'N/A',
+                notes: getInputValue('supplierNotes') || 'No notes provided.',
+                email: getInputValue('email'),
+                totalAmountPaid: parseFloat(getInputValue('totalAmountPaid')) || 0.0,
+                lastShipmentDate: new Date().toISOString().split('T')[0],
+                status: getInputValue('status'),
+            };
+
+            console.log('Supplier Data Sent:', supplierData);
+
+            try {
+                const response = await fetch('http://localhost:8080/api/addsuppliers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(supplierData),
+                });
+
+                if (response.ok) {
+                    showAlert('Supplier added successfully!', 'success');
+                    closeModal('newSupplierModal');
+                    document.getElementById('newSupplierForm').reset();
+
+                    // Optionally, refresh the supplier dropdowns
+                    fetchAndPopulateSuppliers();
+                } else {
+                    const errorData = await response.json();
+                    console.error('API Error:', errorData);
+                    showAlert(`Error: ${errorData.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding supplier:', error);
+                showAlert('An error occurred. Please check your connection and try again.', 'error');
+            }
+        }
+
+        // Add Customer Function
+        async function addCustomer() {
+            const customerData = {
+                customerName: `${getInputValue('firstName')} ${getInputValue('lastName')}`,
+                phoneNumber: getInputValue('phoneNumber'),
+                totalPurchases: parseFloat(getInputValue('totalPurchases')) || 0.0,
+                loyaltyPoints: parseInt(getInputValue('loyaltyPoints')) || 0,
+                lastPurchaseDate: new Date().toISOString().split('T')[0],
+                loyaltyStatus: getInputValue('loyaltyStatus'),
+                notes: getInputValue('notes') || 'No notes provided.',
+            };
+
+            console.log('Customer Data Sent:', customerData); // Debugging Output
+
+            try {
+                const response = await fetch('http://localhost:8080/api/customers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(customerData),
+                });
+
+                if (response.ok) {
+                    showAlert('Customer added successfully!', 'success');
+                    closeModal('newCustomerModal');
+                    document.getElementById('newCustomerForm').reset(); // Reset form after success
+                } else {
+                    const errorData = await response.json();
+                    console.error('API Error:', errorData);
+                    showAlert(`Error: ${errorData.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding customer:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+            }
+        }
+
+        async function handleProductSubmit() {
+            const productName = getInputValue('productName');
+
+            const purchaseDateStr = getInputValue('purchaseDate');
+            const purchasePriceStr = getInputValue('purchasePrice');
+            const priceStr = getInputValue('salesPrice');
+            const supplier = getInputValue('supplier');
+            const quantityStr = getInputValue('quantity');
+            const category = getCategoryValue();
+            const storeInputStr = getInputValue('storeNumber');
+
+            // Check for missing required fields
+            const requiredFields = {
+                'Product Name': productName,
+                'Purchase Date': purchaseDateStr,
+                'Purchase Price': purchasePriceStr,
+                'Selling Price': priceStr,
+                'Supplier': supplier,
+                'Quantity': quantityStr,
+                'Category': category,
+                'Store': storeInputStr
+            };
+
+            const missingFields = Object.entries(requiredFields)
+                .filter(([_, value]) => value.trim() === '')
+                .map(([key]) => key);
+
+            if (missingFields.length > 0) {
+                showAlert(`Please fill in the following required fields: ${missingFields.join(', ')}`, 'error');
+                return;
+            }
+
+            // Parse numeric fields
+            const purchasePrice = parseFloat(purchasePriceStr);
+            const price = parseFloat(priceStr);
+            const quantity = parseInt(quantityStr, 10);
+            const storeNumber = parseInt(storeInputStr, 10);
+
+            // Validate numeric fields
+            if (isNaN(purchasePrice) || isNaN(price) || isNaN(quantity) || isNaN(storeNumber)) {
+                showAlert('Please enter valid numbers for Purchase Price, Selling Price, Quantity, and Store Number.', 'error');
+                return;
+            }
+
+            // Parse purchase date to "yyyy-MM-dd" format
+            const purchaseDate = purchaseDateStr; // Assuming your backend accepts date in "yyyy-MM-dd" format
+
+            // Get barcode and description
+            const barcode = getInputValue('productBarcode') || null;
+            const description = getInputValue('description') || '';
+
+            // Proceed with API call
+            const productDTO = {
+                name: productName,
+                barcode: barcode,
+                description: description,
+                salesPrice: price,
+                purchasePrice: purchasePrice,
+                purchaseDate: purchaseDate,
+                quantity: quantity,
+                category: category,
+                vendor: supplier,
+                storeNumber: storeNumber,
+                isActive: true
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/addproduct', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productDTO),
+                });
+
+                if (response.status === 201) {
+                    showAlert('The product has been added successfully!', 'success');
+                    closeModal('newItemModal');
+                    document.getElementById('productForm').reset();
+
+                    // Optionally, refresh any data or lists
+                    fetchLowStockItems();
+                } else {
+                    const errorData = await response.json();
+                    showAlert(`Failed to add product: ${errorData.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding product:', error);
+                showAlert('An error occurred while adding the product. Please try again.', 'error');
+            }
+        }
+
+        // Helper function to format datetime-local input to "yyyy-MM-dd HH:mm:ss"
+        function formatDateTimeLocal(dateTimeLocal) {
+            // Expected input: "YYYY-MM-DDTHH:MM"
+            // Output: "YYYY-MM-DD HH:MM:SS"
+            const [date, time] = dateTimeLocal.split('T');
+            return `${date} ${time}:00`;
+        }
+
+        // Initialize Chart.js Chart
+        // Initialize Chart.js Chart
+async function initializeChart(storeNumber = '') {
+    // Destroy the existing chart instance if it exists
+    if (salesChart) {
+        salesChart.destroy();
+    }
+
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    salesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [], // Will be populated dynamically
+            datasets: [{
+                label: 'Revenue',
+                data: [],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            }],
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+        },
+    });
+
+    // Fetch initial data for the default selected filter
+    const defaultFilter = document.getElementById('timeFilter').value || 'monthly';
+    await fetchChartData(defaultFilter, storeNumber);
+}
+
+
+        // Update Chart Based on Time Filter
+        async function updateChart(storeNumber = '') {
+    console.log("Time filter changed, updating chart..."); // Add this line
+    if (typeof storeNumber === 'object' && storeNumber !== null && 'target' in storeNumber) {
+        storeNumber = document.getElementById('storeNumberDropdown').value;
+    }
+    const selectedTime = document.getElementById('timeFilter').value;
+    await fetchChartData(selectedTime, storeNumber);
+}
+
+async function fetchChartData(filter, storeNumber = '') {
+    try {
+        const response = await fetch(`http://localhost:8080/api/sales-data-chart?filter=${filter}&storeNumber=${storeNumber}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+
+        // Check if the fetched data is empty
+        if (!data.labels || data.labels.length === 0 || !data.data || data.data.length === 0) {
+            showAlert("No data available for this selection.", "info");
+            salesChart.data.labels = [];
+            salesChart.data.datasets[0].data = [];
+            salesChart.update();
+            return;
+        }
+
+        // Update chart with fetched data if it's not empty
+        salesChart.data.labels = data.labels;
+        salesChart.data.datasets[0].data = data.data;
+        salesChart.update();
+
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+        showAlert('Failed to load sales chart data. Please try again later.', 'error');
+    }
+}
+
+
+
+
+        // Function to redirect to newSale4.html
+        function redirectToNewSale() {
+            window.location.href = 'newSale4.html';
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('customAlert');
+
+            // Set message and type (success or error)
+            alertBox.textContent = message;
+            alertBox.classList.remove('bg-green-500', 'bg-red-500', 'text-white', 'opacity-0', 'invisible');
+            if (type === 'success') {
+                alertBox.classList.add('bg-green-500');
+            } else if (type === 'error') {
+                alertBox.classList.add('bg-red-500');
+            }
+            alertBox.classList.add('opacity-100', 'visible');
+
+            // Automatically hide the alert after 3 seconds
+            setTimeout(() => {
+                alertBox.classList.remove('opacity-100', 'visible');
+                alertBox.classList.add('opacity-0', 'invisible');
+            }, 3000);
+        }
+
+        // Function to fetch and display low-stock items
+        /*async function fetchLowStockItems() {
+            try {
+                const response = await fetch('http://localhost:8080/api/products');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const products = await response.json();
+                console.log('Fetched products:', products); // Debugging Output
+
+                // Filter products with quantity < 15
+                lowStockItems = products.filter(product => product.quantity < 15);
+                console.log('Low Stock Items:', lowStockItems); // Debugging Output
+
+                // Initialize pagination
+                lowStockCurrentPageNumber = 1;
+                displayLowStockPage(lowStockCurrentPageNumber);
+                updateLowStockPaginationControls();
+            } catch (error) {
+                console.error('Error fetching low-stock items:', error);
+                alert('Failed to load low-stock items. Please try again later.');
+            }
+        }*/ 
+
+        // Redirect to Inventory3.html instead of opening a modal
+        document.querySelector('button[data-modal-target="newItemModal"]').addEventListener('click', () => {
+            window.location.href = 'inventory3.html';
+        });
+
+    </script>
+
+
+
+
+
+
+
+    
+
+    
+
+</body>
+
+</html>

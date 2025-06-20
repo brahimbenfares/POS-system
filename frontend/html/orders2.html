@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Head Content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+
+    <!-- Chart.js -->
+    <script src="js/chart.min.js" defer></script>
+
+    <!-- Moment.js and Chart.js Adapter -->
+    <script src="js/moment.min.js" defer></script>
+    <script src="js/chartjs-adapter-moment.min.js" defer></script>
+
+    <!-- FileSaver.js for Exporting -->
+    <script src="js/FileSaver.min.js" defer></script>
+
+    <!-- PapaParse for CSV Export -->
+    <script src="js/papaparse.min.js" defer></script>
+
+    <!-- html2canvas for screenshots -->
+    <script src="js/html2canvas.min.js" defer></script>
+
+    <!-- jsPDF for PDF export -->
+    <script src="js/jspdf.umd.min.js" defer></script>
+
+    <style>
+        /* Alert Box Styles */
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 300px;
+            padding: 15px;
+            background-color: #4CAF50; /* Green for success */
+            color: white;
+            font-size: 16px;
+            text-align: center; /* Center text */
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 2000; /* Ensure it's above other elements */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .custom-alert.error {
+            background-color: #f44336; /* Red for error */
+        }
+
+        .custom-alert.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Loading Spinner Styles */
+        #loadingSpinner {
+            z-index: 3000;
+        }
+    </style>
+</head>
+
+<body class="flex bg-gray-100 min-h-screen">
+
+
+
+        <!-- Custom Alert -->
+    <div id="customAlert" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-sm p-4 rounded-lg shadow-lg z-50 text-white text-center text-lg transition-opacity duration-300 opacity-0 invisible"></div>
+
+    <div id="loadingSpinner" class="fixed inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+    </div>
+
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex flex-col">
+            <div class="p-6">
+                <img src="img/HB solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+                <h2 class="text-center text-xl font-semibold">3008</h2>
+                <nav class="mt-8">
+                    <ul class="space-y-4">
+                        <li id="dashboardMenu">
+                            <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                            </a>
+                        </li>
+                        <li id="newSaleMenu">
+                            <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                            </a>
+                        </li>
+                        <li id="inventoryMenu">
+                            <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                            </a>
+                        </li>
+                        <li id="ordersMenu">
+                            <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                            </a>
+                        </li>
+                        <li id="suppliersMenu">
+                            <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                            </a>
+                        </li>
+                        <li id="customersMenu">
+                            <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                            </a>
+                        </li>
+                        <li id="adminAccessMenu">
+                            <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                            </a>
+                        </li>
+                        <li id="reportsMenu">
+                            <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                            </a>
+                        </li>
+                        <li>                 
+                            <button onclick="logout()"
+                                class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            <!-- Header with Action Button -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold">الطلبات</h1>
+                <button onclick="window.location.href='newSale4.html'"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+                    <img src="icons/plus-circle.svg" alt="Add Order Icon" class="w-5 h-5 mr-2" />إضافة طلب
+                </button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
+                            <img src="icons/shopping-cart.svg" alt="All Orders Icon" class="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">كل الطلبات</h3>
+                            <p id="totalOrders" class="text-2xl font-bold">840</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-500 mr-4">
+                            <img src="icons/clock.svg" alt="Active Orders Icon" class="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">الطلبات النشطة</h3>
+                            <p id="activeOrders" class="text-2xl font-bold">68</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-500 mr-4">
+                            <img src="icons/clock.svg" alt="Pending Orders Icon" class="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">الطلبات المعلقة</h3>
+                            <p id="pendingOrders" class="text-2xl font-bold">18</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-100 text-red-500 mr-4">
+                            <img src="icons/x-circle.svg" alt="Cancelled Orders Icon" class="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">الطلبات الملغاة</h3>
+                            <p id="cancelledOrders" class="text-2xl font-bold">8</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="mb-4 flex flex-wrap space-x-4 space-y-2">
+                <button onclick="filterOrders('all')" id="taball"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg">كل الطلبات</button>
+                <button onclick="filterOrders('pending')" id="tabpending"
+                    class="bg-gray-200 px-4 py-2 rounded-lg">الطلبات المعلقة</button>
+                <button onclick="filterOrders('confirm')" id="tabconfirm"
+                    class="bg-gray-200 px-4 py-2 rounded-lg">الطلبات المؤكدة</button>
+                <button onclick="filterOrders('cancelled')" id="tabcancelled"
+                    class="bg-gray-200 px-4 py-2 rounded-lg">الطلبات الملغاة</button>
+                <div class="mb-4">
+                    <label for="saleTypeFilter" class="block text-gray-700 font-semibold">تصفية حسب نوع البيع:</label>
+                    <select id="saleTypeFilter"
+                        class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onchange="filterOrdersBySaleType()">
+                        <option value="all">كل الطلبات</option>
+                        <option value="each">كل قطعة</option>
+                        <option value="wholesale">بيع بالجملة</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="storeFilter" class="block text-gray-700 font-semibold">تصفية حسب رقم المتجر:</label>
+                    <select id="storeFilter"
+                        class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onchange="filterOrdersByStore()">
+                        <option value="all">كل المتاجر</option>
+                        <!-- سيتم تعبئة أرقام المتاجر ديناميكياً -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Order Table -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                معرف الطلب</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                التاريخ</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الوقت</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الحالة</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- سيتم تعبئة محتوى الجدول ديناميكياً -->
+                    </tbody>
+                </table>
+            </div>
+
+
+            <!-- Modals -->
+            <!-- Add Order Modal -->
+            <div id="addOrderModal"
+                class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden z-50"
+                aria-hidden="true">
+                <div class="bg-white rounded-lg w-11/12 max-w-3xl p-6 relative max-h-screen overflow-y-auto">
+                    <!-- Modal Header -->
+                    <div class="flex justify-between items-center border-b p-4">
+                        <h3 class="text-xl font-semibold">إضافة طلب جديد</h3>
+                        <button class="text-gray-600 hover:text-gray-800" onclick="closeModal('addOrderModal')">
+                            <img src="icons/x-octagon.svg" alt="Close Icon" class="w-6 h-6" />
+                        </button>
+                    </div>
+                    <!-- Modal Body -->
+                    <div class="p-4">
+                        <form id="orderForm">
+                            <div class="mb-4">
+                                <label for="orderProductId" class="block text-gray-700 font-medium">معرف المنتج</label>
+                                <input type="text" id="orderProductId"
+                                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="orderQuantity" class="block text-gray-700 font-medium">الكمية</label>
+                                <input type="number" id="orderQuantity" min="1"
+                                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="orderPromoId" class="block text-gray-700 font-medium">معرف الترويج</label>
+                                <input type="text" id="orderPromoId"
+                                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="orderDiscount" class="block text-gray-700 font-medium">الخصم (%)</label>
+                                <input type="number" id="orderDiscount" min="0" max="100"
+                                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="mb-4">
+                                <label for="orderDate" class="block text-gray-700 font-medium">التاريخ</label>
+                                <input type="date" id="orderDate"
+                                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="orderTime" class="block text-gray-700 font-medium">الوقت</label>
+                                <input type="time" id="orderTime"
+                                    class="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="flex justify-end border-t p-4 space-x-4">
+                        <button class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600"
+                            onclick="closeModal('addOrderModal')">إلغاء</button>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                            onclick="handleOrderSubmit()">حفظ الطلب</button>
+                    </div>
+                </div>
+            </div>
+            <!-- End of Modals -->
+        </div>
+    </div>
+
+
+    <!-- Alert Box -->
+    <div id="customAlert" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-sm p-4 rounded-lg shadow-lg z-50 text-white text-center text-lg transition-opacity duration-300 opacity-0 invisible"></div>
+
+    <!-- Scripts -->
+    <script src="js/logout.js"></script>
+
+    <script>
+        let orders = [];
+        let currentSaleTypeFilter = 'all';
+        let currentStoreFilter = 'all'; // Define currentStoreFilter here
+        let currentFilter = 'all';
+        let currentEditingOrderId = null;
+
+
+        function showAlert(message, type = 'success') {
+                const alertBox = document.getElementById('customAlert');
+
+                // Set message and type (success or error)
+                alertBox.textContent = message;
+                alertBox.className = 'custom-alert'; // Reset classes
+                alertBox.classList.add(type); // Add type-specific class ('success' or 'error')
+                alertBox.classList.add('show'); // Show the alert
+
+                // Automatically hide the alert after 3 seconds
+                setTimeout(() => {
+                    alertBox.classList.remove('show');
+                }, 3000);
+            }
+
+
+            // Fetch all products and promos on page load
+            document.addEventListener('DOMContentLoaded', () => {
+
+            
+            const role = localStorage.getItem('adminRole'); // Retrieve role
+
+            // Adjust menu based on role
+            adjustMenuBasedOnRole(role);
+           
+            
+
+            fetchMinimalOrderDetails(); // Fetch orders with minimal details on page load
+            setupEventListeners();      // Setup event listeners
+            fetchStoreNumbers();
+        });
+
+        function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+
+            if (role === 'owner') {
+                // Do nothing, show all menus
+            } else if (role === 'manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+        // Fetch and populate store numbers
+        function fetchStoreNumbers() {
+            showLoadingSpinner(); // Show spinner while fetching store numbers
+            fetch('http://localhost:8080/api/store-numbers')
+                .then(response => response.json())
+                .then(storeNumbers => {
+                    const storeFilter = document.getElementById('storeFilter');
+                    storeNumbers.forEach(storeNumber => {
+                        const option = document.createElement('option');
+                        option.value = storeNumber;
+                        option.textContent = `Store ${storeNumber}`;
+                        storeFilter.appendChild(option);
+                    });
+                    hideLoadingSpinner(); // Hide spinner after data is loaded
+                })
+                .catch(error => {
+                    console.error('Error fetching store numbers:', error);
+                    hideLoadingSpinner(); // Hide spinner if there's an error
+                });
+        }
+
+        // Modify fetchMinimalOrderDetails to accept storeNumber
+        function fetchMinimalOrderDetails(storeNumber = null) {
+            showLoadingSpinner(); // Show spinner before fetching data
+            let url = 'http://localhost:8080/api/orders/minimal-details';
+            if (storeNumber && storeNumber !== 'all') {
+                url += `?storeNumber=${storeNumber}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    orders = data;
+                    updateOrderDisplay();  // Display all fetched orders
+                    updateStatistics();    // Update the order statistics
+                    hideLoadingSpinner();  // Hide spinner after data is loaded
+                })
+                .catch(error => {
+                    console.error('Error fetching orders:', error);
+                    hideLoadingSpinner();  // Hide spinner even if there's an error
+                });
+        }
+
+        // Event listener for the store filter dropdown
+        function filterOrdersByStore() {
+            currentStoreFilter = document.getElementById('storeFilter').value;
+            fetchMinimalOrderDetails(currentStoreFilter);  // Fetch orders for the selected store
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Use correct IDs based on your HTML
+            const allTab = document.getElementById('taball');
+            const pendingTab = document.getElementById('tabpending');
+            const confirmedTab = document.getElementById('tabconfirm');
+            const cancelledTab = document.getElementById('tabcancelled');
+
+            // Ensure elements are not null before adding event listeners
+            if (allTab) {
+                allTab.addEventListener('click', () => setActiveTab('all'));
+            }
+            if (pendingTab) {
+                pendingTab.addEventListener('click', () => setActiveTab('pending'));
+            }
+            if (confirmedTab) {
+                confirmedTab.addEventListener('click', () => setActiveTab('confirm'));
+            }
+            if (cancelledTab) {
+                cancelledTab.addEventListener('click', () => setActiveTab('cancelled'));
+            }
+
+            const saleTypeFilter = document.getElementById('saleTypeFilter');
+            saleTypeFilter.addEventListener('change', filterOrdersBySaleType);
+        }
+
+        function setActiveTab(tabId) {
+            document.querySelectorAll('.mb-4 .flex button').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.add('bg-gray-200');
+            });
+            const activeTab = document.getElementById(`tab${tabId}`);
+            if (activeTab) {
+                activeTab.classList.add('bg-blue-500', 'text-white');
+                activeTab.classList.remove('bg-gray-200');
+            }
+        }
+
+        // Display orders in the table based on selected filters
+        function updateOrderDisplay() {
+            const filteredOrders = orders.filter(order => {
+                // Apply status filter
+                if (currentFilter !== 'all' && order.status.toLowerCase() !== currentFilter) {
+                    return false;
+                }
+                // Apply sale type filter
+                if (currentSaleTypeFilter !== 'all' && order.saleType !== currentSaleTypeFilter) {
+                    return false;
+                }
+                // Apply store filter
+                if (currentStoreFilter !== 'all' && order.storeNumber !== parseInt(currentStoreFilter)) {
+                    return false;
+                }
+                return true; // Return all orders if no filter is applied
+            });
+
+            const tbody = document.getElementById('orderTableBody');
+            tbody.innerHTML = ''; // Clear existing table content
+
+            filteredOrders.forEach(order => {
+                const row = document.createElement('tr');
+                row.classList.add('border-b');
+
+                // Get action buttons based on the order status
+                const actionButtons = getOrderActionButton(order.status, order.orderId);
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="orderDetails.html?orderId=${order.orderId}" class="text-blue-500 hover:underline">${order.orderId}</a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">${order.orderDateTime.split(" ")[0]}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${order.orderDateTime.split(" ")[1]}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${capitalizeFirstLetter(order.status)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${actionButtons}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Function to update statistics
+        function updateStatistics() {
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('activeOrders').textContent = orders.filter(o => o.status.toLowerCase() === 'confirm').length;
+            document.getElementById('pendingOrders').textContent = orders.filter(o => o.status.toLowerCase() === 'pending').length;
+            document.getElementById('cancelledOrders').textContent = orders.filter(o => o.status.toLowerCase() === 'cancelled').length;
+        }
+
+        // Get order action buttons
+        function getOrderActionButton(action, id) {
+            let buttons = '';
+            if (action && action.toLowerCase() === 'pending') {
+                buttons += `<button onclick="confirmOrder(${id})" class="bg-green-500 text-white px-2 py-1 rounded mr-2">Confirm</button>`;
+            }
+            buttons += `<button onclick="deleteOrder(${id})" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>`;
+            return buttons;
+        }
+
+        // Event listener for sale type filter dropdown
+        function filterOrdersBySaleType() {
+            currentSaleTypeFilter = document.getElementById('saleTypeFilter').value;
+            updateOrderDisplay();
+        }
+
+        function filterOrders(status) {
+            currentFilter = status.toLowerCase();
+            setActiveTab(currentFilter);
+            updateOrderDisplay();
+        }
+
+        // Helper function to capitalize the first letter
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById('orderForm').reset();
+            currentEditingOrderId = null;
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Handle Order Form Submit
+        function handleOrderSubmit() {
+            const productId = parseInt(document.getElementById('orderProductId').value);
+            const quantity = parseInt(document.getElementById('orderQuantity').value);
+            const promoId = document.getElementById('orderPromoId').value || null;
+            const discount = parseFloat(document.getElementById('orderDiscount').value) || 0;
+            const date = document.getElementById('orderDate').value;
+            const time = document.getElementById('orderTime').value;
+
+            const orderData = {
+                orderItems: [{
+                    productId,
+                    quantity,
+                    promoId: promoId ? parseInt(promoId) : null,
+                    discountPercentage: discount,
+                    discountAmount: 0, // Adjust if needed
+                    finalPrice: 0, // Adjust if needed
+                    additionalDiscountDescription: null
+                }],
+                date,
+                time,
+                orderType: 'online' // Adjust if needed
+            };
+
+            let url = 'http://localhost:8080/api/create-order';
+            let method = 'POST';
+
+            if (currentEditingOrderId) {
+                // Update existing order
+                url = `http://localhost:8080/api/orders/${currentEditingOrderId}`;
+                method = 'PUT';
+            }
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        closeModal('addOrderModal');
+                        fetchMinimalOrderDetails(currentStoreFilter);
+                    } else {
+                        response.json().then(error => {
+                            showAlert(`Error saving order: ${error.message}`, 'error');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving order:', error);
+                    showAlert('An error occurred while saving the order.', 'error');
+                });
+        }
+
+        // Action Functions
+        function confirmOrder(id) {
+            fetch(`http://localhost:8080/api/orders/confirm/${id}`, {
+                method: 'PUT'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        showAlert(`Order ${id} has been confirmed.`, 'success');
+                        fetchMinimalOrderDetails(currentStoreFilter);
+                    } else {
+                        response.json().then(error => {
+                            showAlert(`Error confirming order: ${error.message}`, 'error');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error confirming order:', error);
+                    showAlert('An error occurred while confirming the order.', 'error');
+                });
+        }
+
+        function editOrder(id) {
+            fetch(`http://localhost:8080/api/orders/${id}`)
+                .then(response => response.json())
+                .then(order => {
+                    currentEditingOrderId = id;
+
+                    // Assuming the order has orderItems array
+                    const orderItem = order.orderItems[0];
+
+                    // Populate the modal with the order data
+                    document.getElementById('orderProductId').value = orderItem.productId;
+                    document.getElementById('orderQuantity').value = orderItem.quantity;
+                    document.getElementById('orderPromoId').value = orderItem.promoId || '';
+                    document.getElementById('orderDiscount').value = orderItem.discountPercentage || 0;
+                    document.getElementById('orderDate').value = order.date;
+                    document.getElementById('orderTime').value = order.time;
+
+                    openModal('addOrderModal');
+                })
+                .catch(error => {
+                    console.error('Error fetching order:', error);
+                    showAlert('An error occurred while fetching the order details.', 'error');
+                });
+        }
+
+        function deleteOrder(id) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                fetch(`http://localhost:8080/api/orders/${id}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            showAlert('Order deleted successfully.', 'success');
+                            fetchMinimalOrderDetails(currentStoreFilter);
+                        } else {
+                            response.json().then(error => {
+                                showAlert(`Error deleting order: ${error.message}`, 'error');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting order:', error);
+                        showAlert('An error occurred while deleting the order.', 'error');
+                    });
+            }
+        }
+
+        function showLoadingSpinner() {
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+        }
+
+        function hideLoadingSpinner() {
+            document.getElementById('loadingSpinner').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

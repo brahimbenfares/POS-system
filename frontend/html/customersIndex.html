@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern E-Commerce Store</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .cart {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .cart a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .cart span {
+            background: red;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 50%;
+        }
+
+        /* Parallax Hero Section */
+        .parallax {
+            height: 100vh;
+            background-image: url('img/134C7D2D-8651-812A-A4AA-B4675CF110CB.jpg'); /* Replace with your image */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            flex-direction: column;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .parallax h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .parallax p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .cta {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #ff5733;
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .cta:hover {
+            background: #e64a19;
+        }
+
+                /* Filters Section */
+                .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            margin-top: 80px;
+        }
+        .filter-container select, .filter-container input, .filter-container button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .filter-container button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        .filter-container button:hover {
+            background-color: #218838;
+        }
+
+
+        /* Product Grid */
+        .product-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: 0.3s ease-in-out;
+        }
+
+        .product-card:hover img {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        .product-card h3 {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .product-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .add-to-cart {
+            background: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .add-to-cart:hover {
+            background: #218838;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">E-Shop</div>
+        <div class="cart">
+            <a href="Checkout.html">🛒 Cart (<span id="cart-count">0</span>)</a>
+            <a href="login.html" id="signInButton" class="ml-4 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-500">Sign In</a>
+            <a href="userpage.html" id="profileButton" class="ml-4 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-500 hidden">For You!</a>
+        </div>
+    </div>
+
+
+    <!-- Parallax Hero Section -->
+    <div class="parallax">
+        <h1>Discover Premium Products</h1>
+        <p>Explore a handpicked selection of the best tech and lifestyle products.</p>
+        <button class="cta">Shop Now</button>
+    </div>
+
+        <!-- Filters -->
+        <div class="filter-container">
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+            </select>
+            <input type="number" id="minPrice" placeholder="Min Price">
+            <input type="number" id="maxPrice" placeholder="Max Price">
+            <button id="applyFilters">Apply</button>
+        </div>
+    
+
+    <!-- Product Grid -->
+    <div class="product-container" id="product-list"></div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Added to Cart</div>
+
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Leave a Review</h2>
+            <textarea id="reviewText" placeholder="Write your review..."></textarea>
+            <button id="submitReview">Submit</button>
+        </div>
+    </div>
+
+    <div class="order-tracking">
+        <h2>Track Your Order</h2>
+        <input type="text" id="orderID" placeholder="Enter Order ID">
+        <button id="trackOrder">Track</button>
+        <p id="orderStatus"></p>
+    </div>
+    
+<!-- Footer Section -->
+<footer class="bg-gray-900 text-white mt-12">
+    <div class="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Company Info -->
+        <div>
+            <h3 class="text-xl font-bold mb-3">About E-Shop</h3>
+            <p class="text-sm text-gray-400">
+                E-Shop is your trusted online store for premium tech and lifestyle products. 
+                We offer high-quality items with fast delivery and top-notch customer service.
+            </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+            <h3 class="text-xl font-bold mb-3">Quick Links</h3>
+            <ul class="text-sm text-gray-400 space-y-2">
+                <li><a href="index.html" class="hover:text-gray-200">Home</a></li>
+                <li><a href="products.html" class="hover:text-gray-200">Products</a></li>
+                <li><a href="about.html" class="hover:text-gray-200">About Us</a></li>
+                <li><a href="contact.html" class="hover:text-gray-200">Contact</a></li>
+                <li><a href="faq.html" class="hover:text-gray-200">FAQs</a></li>
+            </ul>
+        </div>
+
+        <!-- Newsletter Subscription & Social Media -->
+        <div>
+            <h3 class="text-xl font-bold mb-3">Stay Connected</h3>
+            <p class="text-sm text-gray-400">Subscribe to our newsletter for exclusive offers & updates.</p>
+            <div class="mt-4 flex">
+                <input type="email" placeholder="Enter your email" class="w-full px-3 py-2 rounded-l-md border-none text-gray-800">
+                <button class="bg-blue-600 px-4 py-2 rounded-r-md text-white hover:bg-blue-500">Subscribe</button>
+            </div>
+
+            <div class="flex space-x-4 mt-4">
+                <a href="#" class="text-gray-400 hover:text-gray-200"><i class="fab fa-facebook"></i> Facebook</a>
+                <a href="#" class="text-gray-400 hover:text-gray-200"><i class="fab fa-twitter"></i> Twitter</a>
+                <a href="#" class="text-gray-400 hover:text-gray-200"><i class="fab fa-instagram"></i> Instagram</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Footer -->
+    <div class="border-t border-gray-700 text-center text-sm py-4 text-gray-500">
+        © 2025 E-Shop. All rights reserved.
+    </div>
+</footer>
+
+    <script>
+    $(document).ready(function () {
+    const apiURL = "/api/products";
+    const productList = $("#product-list");
+    const categoryFilter = $("#categoryFilter");
+    const minPriceInput = $("#minPrice");
+    const maxPriceInput = $("#maxPrice");
+    const cartCount = $("#cart-count");
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let allProducts = [];
+    let loadedProductIds = new Set(); // Track loaded product IDs
+    let page = 1;
+    let isLoading = false;
+    const itemsPerPage = 10;
+    const userToken = localStorage.getItem("customerToken");
+
+        if (userToken) {
+            $("#signInButton").hide();
+            $("#profileButton").removeClass("hidden");
+        }
+    function fetchProducts(loadMore = false) {
+        if (isLoading) return;
+        isLoading = true;
+
+        $.get(`${apiURL}?page=${page}&limit=${itemsPerPage}`, function (products) {
+            if (!loadMore) {
+                allProducts = products;
+                updateCategoryDropdown();
+            }
+
+            // Remove duplicate products
+            let newProducts = products.filter(p => !loadedProductIds.has(p.id));
+
+            newProducts.forEach(p => loadedProductIds.add(p.id)); // Track loaded IDs
+
+            displayProducts(newProducts, loadMore);
+            page++;
+            isLoading = false;
+        }).fail(() => {
+            isLoading = false;
+        });
+    }
+
+    function updateCategoryDropdown() {
+        const categories = [...new Set(allProducts.map(p => p.category))];
+        categoryFilter.empty().append(`<option value="">All Categories</option>`);
+        categories.forEach(category => {
+            categoryFilter.append(`<option value="${category}">${category}</option>`);
+        });
+    }
+
+    function displayProducts(products, append = false) {
+        if (!append) productList.empty();
+        if (products.length === 0) {
+            if (!append) productList.append("<p>No products found.</p>");
+            return;
+        }
+        products.forEach(product => {
+            productList.append(`
+                <div class="product-card">
+                    <img src="img/default-product.jpg" alt="${product.name}">
+                    <h3>${product.name}</h3>
+                    <p>$${product.salesPrice.toFixed(2)}</p>
+                    <p><small>${product.description || 'No description available'}</small></p>
+                    <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+                    <button class="wishlist" data-id="${product.id}">❤️</button>
+                </div>
+            `);
+        });
+
+        $(".add-to-cart").click(addToCart);
+        $(".wishlist").click(toggleWishlist);
+    }
+
+    function addToCart() {
+        const productId = $(this).data("id");
+        const existingItem = cart.find(item => item.id === productId);
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({ id: productId, quantity: 1 });
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+        $("#toast").fadeIn().delay(1000).fadeOut();
+    }
+
+    function updateCartCount() {
+        let totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCount.text(totalItems);
+    }
+
+
+
+    function applyFilters() {
+        let filteredProducts = allProducts;
+        const selectedCategory = categoryFilter.val();
+        const minPrice = parseFloat(minPriceInput.val());
+        const maxPrice = parseFloat(maxPriceInput.val());
+
+        if (selectedCategory) {
+            filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
+        }
+
+        if (!isNaN(minPrice)) {
+            filteredProducts = filteredProducts.filter(p => p.salesPrice >= minPrice);
+        }
+
+        if (!isNaN(maxPrice)) {
+            filteredProducts = filteredProducts.filter(p => p.salesPrice <= maxPrice);
+        }
+
+        displayProducts(filteredProducts);
+    }
+
+    function toggleWishlist() {
+        const productId = $(this).data("id");
+        let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+
+        if (wishlist.includes(productId)) {
+            wishlist = wishlist.filter(id => id !== productId);
+            $(this).removeClass("active");
+        } else {
+            wishlist.push(productId);
+            $(this).addClass("active");
+        }
+
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    }
+
+    $("#applyFilters").click(applyFilters);
+    $(window).scroll(function () {
+        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+            fetchProducts(true);
+        }
+    });
+
+    fetchProducts();
+    updateCartCount();
+});
+
+
+    </script>
+    
+
+
+</body>
+</html>

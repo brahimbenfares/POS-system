@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التسعير الذكي</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <script src="AiJs/ai_pricing.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+
+    <!-- Main Content -->
+    <div class="flex-1 p-10">
+        <h1 class="text-3xl font-bold mb-6">💰 التسعير الذكي</h1>
+
+        <!-- Pricing Table -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">اقتراحات الأسعار</h2>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2">رقم المنتج</th>
+                        <th class="border px-4 py-2">السعر الحالي</th>
+                        <th class="border px-4 py-2">السعر المقترح</th>
+                        <th class="border px-4 py-2">التغيير</th>
+                        <th class="border px-4 py-2">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="pricingTable"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        // Dynamically load the sidebar into the page
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("ai_sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+                })
+                .catch(error => console.error("Error loading sidebar:", error));
+        });
+
+</script>
+</body>
+</html>

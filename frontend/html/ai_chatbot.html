@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مساعد AI</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <script src="AiJs/ai_chatbot.js" defer></script>
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+    }
+
+</style>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="w-64 bg-white shadow-md"></div>
+
+    <!-- Chatbot Content Wrapper -->
+    <div class="flex-1 p-6 flex flex-col overflow-hidden">
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">🤖 مساعد AI</h1>
+
+        <!-- Main Chat Area -->
+        <div class="bg-white p-6 rounded-lg shadow-md border flex-1 overflow-auto min-h-[500px] max-h-[calc(100vh-150px)]">
+            <p class="text-gray-600">اسأل AI عن التحليلات والتوقعات.</p>
+
+            <!-- Input Field -->
+            <input type="text" id="chatbot-input" placeholder="اكتب سؤالك هنا..." class="border p-2 w-full mt-3 rounded">
+
+            <!-- Suggested Questions -->
+            <div class="mt-4">
+                <p class="text-gray-700 font-semibold">💡 أمثلة على الأسئلة:</p>
+                <ul id="suggested-questions" class="mt-2 space-y-1 text-sm text-gray-600 cursor-pointer">
+                    <li onclick="setChatbotInput('What is the top selling product today?')">⭐ What is the top selling product today?</li>
+                    <li onclick="setChatbotInput('Can you predict sales for the next week?')">📈 Can you predict sales for the next week?</li>
+                    <li onclick="setChatbotInput('Which products are running low on stock?')">📦 Which products are running low on stock?</li>
+                    <li onclick="setChatbotInput('Do I need to reorder any products?')">🔄 Do I need to reorder any products?</li>
+                    <li onclick="setChatbotInput('What are the latest price suggestions?')">💰 What are the latest price suggestions?</li>
+                    <li onclick="setChatbotInput('What are the current customer trends?')">👥 What are the current customer trends?</li>
+                    <li onclick="setChatbotInput('Are there any suspicious orders?')">⚠️ Are there any suspicious orders?</li>
+                </ul>
+            </div>
+
+            <!-- Ask Button -->
+            <button onclick="askChatbot()" class="bg-blue-500 text-white py-2 px-4 rounded mt-4 hover:bg-blue-600 transition">
+                🔍 استفسر
+            </button>
+
+            <!-- Chatbot Response -->
+            <div id="chatbot-response" class="mt-4 text-blue-600 text-sm whitespace-pre-wrap break-words font-medium"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar injection
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("ai_sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+                })
+                .catch(error => console.error("Error loading sidebar:", error));
+        });
+    </script>
+</body>
+

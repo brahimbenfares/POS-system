@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Receipt</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="css/sweetalert2.min.css">
+
+    <!-- External Libraries -->
+    <script src="js/chart.min.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/chartjs-adapter-moment.min.js"></script>
+    <script src="js/FileSaver.min.js"></script>
+    <script src="js/papaparse.min.js"></script>
+    <script src="js/sweetalert2.min.js"></script>
+    <script src="js/html2canvas.min.js"></script>
+    <script src="js/jspdf.umd.min.js"></script>
+
+    <style>
+        /* Custom styles for print */
+        @media print {
+            aside, #loadingSpinner, #downloadPdf, #printReceipt, .flex.justify-end.mb-6 {
+                display: none !important;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+            }
+
+            main {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                width: 100%;
+            }
+
+            #receipt {
+                width: 180mm;
+                margin: 0 auto;
+                padding: 10mm;
+                font-size: 10pt;
+                color: #000;
+                box-shadow: none;
+            }
+
+            #receipt table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+
+            #receipt th, #receipt td {
+                padding: 4px;
+                text-align: center;
+                border: 1px solid #000;
+                word-wrap: break-word;
+                font-size: 10pt;
+            }
+
+            #receipt * {
+                color: #000 !important;
+            }
+        }
+
+        #receipt table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        #receipt th, #receipt td {
+            padding: 6px;
+            text-align: center;
+            border: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+    <div id="loadingSpinner" class="fixed inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md flex flex-col">
+        <div class="p-6">
+            <img src="img/HB%20solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+            <h2 class="text-center text-2xl font-semibold">3008</h2>
+            <nav class="mt-8">
+                <ul class="space-y-4">
+                    <li id="dashboardMenu">
+                        <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                        </a>
+                    </li>
+                    <li id="newSaleMenu">
+                        <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                        </a>
+                    </li>
+                    <li id="inventoryMenu">
+                        <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                        </a>
+                    </li>
+                    <li id="ordersMenu">
+                        <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                        </a>
+                    </li>
+                    <li id="suppliersMenu">
+                        <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                        </a>
+                    </li>
+                    <li id="customersMenu">
+                        <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                        </a>
+                    </li>
+                    <li id="adminAccessMenu">
+                        <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                        </a>
+                    </li>
+                    <li id="reportsMenu">
+                        <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                        </a>
+                    </li>
+                    <li id="gainsMenu">
+                        <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                            <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                        </a>
+                    </li>
+                    <li>                 
+                        <button onclick="logout()"
+                            class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                            <span>تسجيل الخروج</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+
+    <main class="flex-1 p-10 overflow-auto">
+        <div class="flex justify-end mb-6">
+            <button onclick="window.location.href='newSale4.html'" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors">
+                العودة إلى الطلبات
+            </button>
+        </div>
+
+        <div id="receipt" class="bg-white shadow-lg rounded-lg p-8 mx-auto max-w-md">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold">3008 PVC</h1>
+                <p class="text-gray-600">Phone: 07.76.42.75.79</p>
+                <p class="text-gray-600">Phone: 06.73.74.21.01</p>
+                <p class="text-gray-600">Mozaia, Blida</p>
+            </div>
+
+            <h2 class="text-xl font-semibold text-center mb-4">Bon de commande</h2>
+
+            <div id="orderDetails" class="mb-4"></div>
+            <div id="orderItemsTable" class="mb-4"></div>
+            <div id="totalSection" class="mb-4 text-right"></div>
+            <div id="qrCode" class="flex justify-center mb-6">
+                <img src="img/3008pvc.jpg" alt="QR Code" width="80">
+            </div>
+
+            <div class="flex justify-between">
+                <button id="downloadPdf" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md transition-colors">
+                    تحميل
+                </button>
+                <button id="printReceipt" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors">
+                    طباعه
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderID = urlParams.get('orderID');
+    
+            if (!orderID) {
+                alert('No Order ID provided.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            
+        const role = localStorage.getItem('adminRole'); // Retrieve role
+
+        // Adjust menu based on role
+        adjustMenuBasedOnRole(role);
+
+       
+    
+            fetchOrderDetails(orderID);
+            setupDownloadPdf();
+            setupPrintReceipt();
+        });
+    
+
+        function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+
+            if (role === 'owner') {
+                // Do nothing, show all menus
+            } else if (role === 'manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+
+
+        
+        function fetchOrderDetails(orderID) {
+            const apiUrl = `http://localhost:8080/api/orders/${orderID}`;
+    
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    populateOrderDetails(data);
+                    populateOrderItems(data.orderItems);
+                    calculateAndDisplayTotal(data.orderItems, data.delivery);
+                })
+                .catch(error => {
+                    console.error('Error fetching order details:', error);
+                    alert('Failed to fetch order details.');
+                });
+        }
+    
+        function populateOrderDetails(order) {
+            const orderDetailsDiv = document.getElementById('orderDetails');
+            const orderDate = new Date(`${order.orderDate}T${order.orderTime}`).toLocaleString();
+    
+            orderDetailsDiv.innerHTML = `
+                <div><strong>Order ID:</strong> ${order.orderID}</div>
+                <div><strong>Date & Time:</strong> ${orderDate}</div>
+            `;
+        }
+
+        function populateOrderItems(orderItems) {
+    const orderItemsTableDiv = document.getElementById('orderItemsTable');
+    let tableHTML = `
+        <table class="min-w-full">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2">الاسم</th>
+                    <th class="px-4 py-2">الكميه</th>
+                    <th class="px-4 py-2">ثمن القطعه</th>
+                    <th class="px-4 py-2">نسبة الترويج</th>
+                    <th class="px-4 py-2">خصم إضافي</th>
+                    <th class="px-4 py-2">السعر النهائي</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    orderItems.forEach(item => {
+        const promoDiscount = (item.promoDiscountPercentage !== null && item.promoDiscountPercentage !== 0) 
+            ? `${item.promoDiscountPercentage}%` 
+            : 'N/A';
+
+        const additionalDiscount = (item.discountAmount !== null && item.discountAmount !== 0) 
+            ? `${item.discountAmount.toFixed(2)} دج` 
+            : ((item.discountPercentage !== null && item.discountPercentage !== 0) 
+                ? `${item.discountPercentage}%` 
+                : 'N/A');
+
+        // Corrected this line
+        const finalPrice = item.finalPrice;
+
+        tableHTML += `
+            <tr>
+                <td class="border px-4 py-2">${item.productName}</td>
+                <td class="border px-4 py-2">${item.quantity}</td>
+                <td class="border px-4 py-2">${item.salesPrice.toFixed(2)}</td>
+                <td class="border px-4 py-2">${promoDiscount}</td>
+                <td class="border px-4 py-2">${additionalDiscount}</td>
+                <td class="border px-4 py-2">${finalPrice.toFixed(2)} دج</td>
+            </tr>
+        `;
+    });
+
+
+    tableHTML += '</tbody></table>';
+    orderItemsTableDiv.innerHTML = tableHTML;
+}
+
+
+function calculateAndDisplayTotal(orderItems, deliveryFee) {
+    let subtotal = 0, totalPromoDiscount = 0, totalAdditionalDiscount = 0, grandTotal = 0;
+
+    orderItems.forEach(item => {
+        subtotal += item.salesPrice * item.quantity;
+
+        // Calculate total promo discount
+        if (item.promoDiscountPercentage !== null && item.promoDiscountPercentage !== 0) {
+            totalPromoDiscount += (item.salesPrice * item.quantity) * (item.promoDiscountPercentage / 100);
+        }
+
+        // Calculate total additional discount
+        if (item.discountAmount !== null && item.discountAmount !== 0) {
+            totalAdditionalDiscount += item.discountAmount;
+        } else if (item.discountPercentage !== null && item.discountPercentage !== 0) {
+            totalAdditionalDiscount += (item.salesPrice * item.quantity) * (item.discountPercentage / 100);
+        }
+
+        // Corrected this line
+        grandTotal += item.finalPrice;
+    });
+
+    document.getElementById('totalSection').innerHTML = `
+        <div><strong>Subtotal:</strong> ${subtotal.toFixed(2)} دج</div>
+        <div><strong>Total Promo Discount:</strong> -${totalPromoDiscount.toFixed(2)} دج</div>
+        <div><strong>Total Additional Discount:</strong> -${totalAdditionalDiscount.toFixed(2)} دج</div>
+        <div><strong>Delivery Fee:</strong> ${deliveryFee.toFixed(2)} دج</div>
+        <div><strong>Grand Total:</strong> ${(grandTotal + deliveryFee).toFixed(2)} دج</div>
+    `;
+}
+
+
+
+        async function setupDownloadPdf() {
+            const downloadButton = document.getElementById('downloadPdf');
+            const printButton = document.getElementById('printReceipt');
+            const buttonsContainer = [downloadButton, printButton];
+
+            downloadButton.addEventListener('click', async () => {
+                try {
+                    buttonsContainer.forEach(button => button.style.display = 'none');
+    
+                    const receiptElement = document.getElementById('receipt');
+                    const canvas = await html2canvas(receiptElement, { scale: 2, useCORS: true, allowTaint: true });
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const pageWidth = pdf.internal.pageSize.getWidth() - 20;
+                    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    
+                    pdf.addImage(imgData, 'PNG', 10, 10, pageWidth, imgHeight);
+                    pdf.save(`Order_Receipt_${new Date().toISOString().slice(0, 10)}.pdf`);
+    
+                    buttonsContainer.forEach(button => button.style.display = 'block');
+                } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Failed to generate PDF.');
+                    buttonsContainer.forEach(button => button.style.display = 'block');
+                }
+            });
+        }
+    
+        function setupPrintReceipt() {
+            document.getElementById('printReceipt').addEventListener('click', () => {
+                window.print();
+            });
+        }
+    </script>
+</body>
+</html>

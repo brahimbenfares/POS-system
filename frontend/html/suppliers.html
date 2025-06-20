@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head Content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management</title>
+    <!-- Custom CSS -->
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <!-- Chart.js -->
+    <script src="js/chart.min.js"></script>
+    <!-- Moment.js and Chart.js Adapter -->
+    <script src="js/moment.min.js"></script>
+    <script src="js/chartjs-adapter-moment.min.js"></script>
+    <!-- FileSaver.js for Exporting -->
+    <script src="js/FileSaver.min.js"></script>
+    <!-- PapaParse for CSV Export -->
+    <script src="js/papaparse.min.js"></script>
+    <!-- html2canvas for screenshots -->
+    <script src="js/html2canvas.min.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="js/jspdf.umd.min.js"></script>
+
+    <style>
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 300px;
+            padding: 15px;
+            background-color: #4CAF50; /* Green for success */
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .custom-alert.error {
+            background-color: #f44336; /* Red for error */
+        }
+
+        .custom-alert.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Sidebar width fix */
+     /* Sidebar width fix */
+    aside {
+        width: 256px; /* Fixed width for consistent appearance */
+        min-width: 256px; /* Ensures sidebar doesn't shrink */
+    }
+        
+    /*hm:*/
+    /* Sidebar Language Selector Styling */
+    .language-selector {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 10px;
+        margin-top: auto;
+    }
+
+    .language-label {
+        font-weight: bold;
+        color: #4b5563;
+    }
+
+    .language-dropdown {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #3b82f6;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .language-dropdown:hover {
+        background-color: #2563eb;
+    }
+
+    .language-dropdown:focus {
+        outline: none;
+        box-shadow: 0px 0px 3px 2px #3b82f6;
+    }
+
+    /*this styling to prevent horizontal expansion :*/
+    /* Main content area with a maximum width */
+    .main-content {
+        max-width: 1500px; /* Adjust this width as necessary */
+        margin: 0 auto;
+        overflow-y: auto; /* Allows vertical scrolling */
+        overflow-x: hidden; /* Prevents horizontal expansion */
+    }
+
+    /* Table container */
+    .table-container {
+        max-height: 500px; /* Set a max height for vertical scrolling */
+        overflow-y: auto; /* Enables vertical scrolling */
+        overflow-x: hidden; /* Prevents horizontal scrolling */
+    }
+
+    </style>
+</head>
+
+<body class="flex bg-gray-100 min-h-screen">
+    <div id="customAlert" class="custom-alert"></div>
+
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md">
+            <div class="p-6">
+                <img src="img/HB solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+                <h2 class="text-center text-xl font-semibold">3008</h2>
+                <nav class="mt-8">
+                    <ul class="space-y-4">
+                        <li id="dashboardMenu">
+                            <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                            </a>
+                        </li>
+                        <li id="newSaleMenu">
+                            <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                            </a>
+                        </li>
+                        <li id="inventoryMenu">
+                            <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                            </a>
+                        </li>
+                        <li id="ordersMenu">
+                            <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                            </a>
+                        </li>
+                        <li id="suppliersMenu">
+                            <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                            </a>
+                        </li>
+                        <li id="customersMenu">
+                            <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                            </a>
+                        </li>
+                        <li id="adminAccessMenu">
+                            <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                            </a>
+                        </li>
+                        <li id="reportsMenu">
+                            <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                            </a>
+                        </li>
+                        <li>                 
+                            <button onclick="logout()"
+                                class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            
+        </aside>
+
+                <!-- Main Content -->
+                <div class="main-content flex-1 p-10">
+                    <!-- Header with Action Button -->
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold">الموردون</h1>
+                        <button onclick="openModal('addSupplierModal')" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center">
+                            <img src="icons/plus-circle.svg" alt="Add Icon" class="w-6 h-6 mr-2" />إضافة مورد
+                        </button>
+                    </div>
+        
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
+                            <i class="ph ph-truck text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">إجمالي الموردين</h3>
+                            <p id="totalSuppliers" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-500 mr-4">
+                            <i class="ph ph-check-circle text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">الموردون النشطون</h3>
+                            <p id="activeSuppliers" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-500 mr-4">
+                            <i class="ph ph-hourglass text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">في انتظار الموافقات</h3>
+                            <p id="pendingApprovals" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-100 text-red-500 mr-4">
+                            <i class="ph ph-x-circle text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">الموردون غير النشطين</h3>
+                            <p id="inactiveSuppliers" class="text-2xl font-bold">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button onclick="filterSuppliers('all')" id="tabAll" class="bg-blue-500 text-white px-4 py-2 rounded-lg">جميع الموردين (0)</button>
+                <button onclick="filterSuppliers('active')" id="tabActive" class="bg-gray-200 px-4 py-2 rounded-lg">الموردون النشطون (0)</button>
+                <button onclick="filterSuppliers('pending')" id="tabPending" class="bg-gray-200 px-4 py-2 rounded-lg">في انتظار الموافقات (0)</button>
+                <button onclick="filterSuppliers('inactive')" id="tabInactive" class="bg-gray-200 px-4 py-2 rounded-lg">الموردون غير النشطين (0)</button>
+            </div>
+
+            <!-- Customer Table with scrollable container -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <!-- Horizontal scroll container for the table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">معرّف المورد</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">اسم المورد</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">الشخص المسؤول</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">البريد الإلكتروني</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">الهاتف</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">إجمالي المبلغ المدفوع</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">تاريخ آخر شحنة</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ملاحظات</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supplierTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Table content will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+
+    
+
+
+    <!-- Modals -->
+    <!-- Add Supplier Modal -->
+    <div id="addSupplierModal" class="modal fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg w-full max-w-lg max-h-full overflow-y-auto mx-6" onclick="event.stopPropagation();">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-xl font-semibold">إضافة مورد جديد</h3>
+                <button class="close-modal text-gray-600 hover:text-gray-800" onclick="closeModal('addSupplierModal')" aria-label="Close Modal">
+                    <span class="text-red-500 text-2xl font-bold">&times;</span>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-4">
+                <form id="SupplierForm">
+
+                <!-- Form Fields -->
+                <div class="mb-4">
+                    <label class="block text-gray-700">اسم المورد</label>
+                    <input type="text" id="supplierName" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">الشخص المسؤول</label>
+                    <input type="text" id="supplierContact" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">البريد الإلكتروني</label>
+                    <input type="email" id="supplierEmail" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">رقم الهاتف</label>
+                    <input type="tel" id="supplierPhoneNumber" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">إجمالي المبلغ المدفوع</label>
+                    <input type="number" step="0.01" id="supplierTotalAmountPaid" class="w-full border rounded px-3 py-2 mt-1">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">تاريخ آخر شحنة</label>
+                    <input type="date" id="supplierLastShipmentDate" class="w-full border rounded px-3 py-2 mt-1">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">ملاحظات</label>
+                    <textarea id="supplierNotes" class="w-full border rounded px-3 py-2 mt-1"></textarea>
+                </div>
+                <button type="button" id="saveSupplierButton" class="bg-blue-500 text-white px-4 py-2 rounded">حفظ المورد</button>
+                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded" onclick="closeModal('addSupplierModal')">إلغاء</button>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- End of Add Supplier Modal -->
+
+
+<!-- Edit Supplier Modal -->
+<div id="editSupplierModal" class="modal fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg w-full max-w-lg max-h-full overflow-y-auto mx-6" onclick="event.stopPropagation();">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center border-b p-4">
+            <h3 class="text-xl font-semibold">تعديل المورد</h3>
+            <button class="close-modal text-gray-600 hover:text-gray-800" onclick="closeModal('editSupplierModal')" aria-label="Close Modal">
+                <span class="text-red-500 text-2xl font-bold">&times;</span>
+            </button>
+        </div>
+        <!-- Modal Body -->
+        <div class="p-4">
+            <form id="editSupplierForm">
+                <!-- Hidden Supplier ID -->
+                <input type="hidden" id="editSupplierId">
+                <!-- Form Fields -->
+                <div class="mb-4">
+                    <label class="block text-gray-700">اسم المورد</label>
+                    <input type="text" id="editSupplierName" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">الشخص المسؤول</label>
+                    <input type="text" id="editSupplierContact" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">البريد الإلكتروني</label>
+                    <input type="email" id="editSupplierEmail" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">رقم الهاتف</label>
+                    <input type="tel" id="editSupplierPhoneNumber" class="w-full border rounded px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">إجمالي المبلغ المدفوع</label>
+                    <input type="number" step="0.01" id="editSupplierTotalAmountPaid" class="w-full border rounded px-3 py-2 mt-1">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">تاريخ آخر شحنة</label>
+                    <input type="date" id="editSupplierLastShipmentDate" class="w-full border rounded px-3 py-2 mt-1">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">ملاحظات</label>
+                    <textarea id="editSupplierNotes" class="w-full border rounded px-3 py-2 mt-1"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">الحالة</label>
+                    <select id="editSupplierStatus" class="w-full border rounded px-3 py-2 mt-1">
+                        <option value="active">نشط</option>
+                        <option value="pending">في انتظار الموافقة</option>
+                        <option value="inactive">غير نشط</option>
+                    </select>
+                </div>
+                <button type="button" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="handleEditSupplierSubmit()">حفظ التعديلات</button>
+                <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded" onclick="closeModal('editSupplierModal')">إلغاء</button>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- End of Edit Supplier Modal -->
+
+
+
+
+
+
+
+
+    <script src="js/logout.js"></script>
+
+    <!-- Scripts -->
+       <!-- Your Custom Script -->
+       <script>
+        // Array to hold fetched suppliers
+        let suppliers = [];
+        // Current filter status
+        let currentFilter = 'all';
+
+        // Initialize page once the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const role = localStorage.getItem('adminRole'); // Retrieve role
+
+        // Adjust menu based on role
+        adjustMenuBasedOnRole(role);
+
+        // If role is not 'Owner' or 'Manager', redirect to 'newSale4.html'
+        if (role !== 'owner' && role !== 'manager') {
+            window.location.href = 'newSale4.html';
+            return;
+        }
+
+
+            fetchSuppliers(); // Fetch suppliers from backend
+
+            // Attach event listener to the Save Supplier button
+            const saveButton = document.getElementById('saveSupplierButton');
+            if (saveButton) {
+                saveButton.addEventListener('click', handleSupplierSubmit);
+            } else {
+                console.error('Save Supplier button not found in the DOM.');
+            }
+
+            // Attach event listener to the Edit Supplier button (if necessary)
+            // You can add similar event listeners for other buttons as needed
+        });
+
+
+
+        
+        function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+
+            if (role === 'owner') {
+                // Do nothing, show all menus
+            } else if (role === 'manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+
+
+        /**
+         * Fetches suppliers from the backend API.
+         */
+        function fetchSuppliers() {
+            fetch('http://localhost:8080/api/suppliers')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    suppliers = data;
+                    updateSupplierDisplay();
+                    updateStatistics();
+                })
+                .catch(error => {
+                    console.error('Error fetching suppliers:', error);
+                    showAlert('An error occurred while fetching suppliers.', 'error');
+                });
+        }
+
+        /**
+         * Updates the supplier table based on the current filter.
+         */
+        function updateSupplierDisplay() {
+            let filteredSuppliers = suppliers.filter(supplier => {
+                if (currentFilter === 'all') return true;
+                return supplier.status === currentFilter;
+            });
+
+            const tbody = document.getElementById('supplierTableBody');
+            tbody.innerHTML = ''; // Clear existing table rows
+
+            filteredSuppliers.forEach(supplier => {
+                const row = document.createElement('tr');
+                row.classList.add('border-b');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.supplierId}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.supplierName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.contactPerson}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.phoneNumber}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.totalAmountPaid.toFixed(2)} دج</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.lastShipmentDate || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${supplier.notes || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editSupplier(${supplier.supplierId})" class="p-1 rounded hover:bg-gray-200">
+                            <img src="icons/edit.svg" alt="Edit Icon" class="w-5 h-5">
+                        </button>
+                        <button onclick="deleteSupplier(${supplier.supplierId})" class="p-1 rounded hover:bg-gray-200">
+                            <img src="icons/trash-2.svg" alt="Delete Icon" class="w-5 h-5">
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        /**
+         * Updates the statistics cards and tab counts.
+         */
+        function updateStatistics() {
+            const totalSuppliers = suppliers.length;
+            const activeSuppliers = suppliers.filter(s => s.status === 'active').length;
+            const pendingApprovals = suppliers.filter(s => s.status === 'pending').length;
+            const inactiveSuppliers = suppliers.filter(s => s.status === 'inactive').length;
+
+            document.getElementById('totalSuppliers').textContent = totalSuppliers;
+            document.getElementById('activeSuppliers').textContent = activeSuppliers;
+            document.getElementById('pendingApprovals').textContent = pendingApprovals;
+            document.getElementById('inactiveSuppliers').textContent = inactiveSuppliers;
+
+            // Update tab counts
+            document.getElementById('tabAll').textContent = `All Suppliers (${totalSuppliers})`;
+            document.getElementById('tabActive').textContent = `Active Suppliers (${activeSuppliers})`;
+            document.getElementById('tabPending').textContent = `Pending Approvals (${pendingApprovals})`;
+            document.getElementById('tabInactive').textContent = `Inactive Suppliers (${inactiveSuppliers})`;
+        }
+
+        /**
+         * Filters suppliers based on the selected status.
+         * @param {string} status - The status to filter by ('all', 'active', 'pending', 'inactive').
+         */
+        function filterSuppliers(status) {
+            currentFilter = status;
+            updateSupplierDisplay();
+        }
+
+        /**
+         * Opens a modal by removing the 'hidden' class.
+         * @param {string} modalId - The ID of the modal to open.
+         */
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Closes a modal by adding the 'hidden' class.
+         * @param {string} modalId - The ID of the modal to close.
+         */
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Displays a custom alert message.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of alert ('success' or 'error').
+         */
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('customAlert');
+            alertDiv.textContent = message;
+
+            // Remove previous type classes
+            alertDiv.classList.remove('error', 'success');
+
+            // Add the new type class
+            if (type === 'error') {
+                alertDiv.classList.add('error');
+            } else {
+                alertDiv.classList.add('success');
+            }
+
+            // Show the alert
+            alertDiv.classList.add('show');
+
+            // Hide the alert after 3 seconds
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+            }, 3000);
+        }
+
+        /**
+         * Handles the submission of the Add Supplier form.
+         */
+         function handleSupplierSubmit() {
+    const supplierName = document.getElementById('supplierName').value.trim();
+    const contactPerson = document.getElementById('supplierContact').value.trim();
+    const email = document.getElementById('supplierEmail').value.trim();
+    const phoneNumber = document.getElementById('supplierPhoneNumber').value.trim();
+    const totalAmountPaid = parseFloat(document.getElementById('supplierTotalAmountPaid').value) || 0.0;
+    const lastShipmentDate = document.getElementById('supplierLastShipmentDate').value || null;
+    const notes = document.getElementById('supplierNotes').value.trim();
+    const status = 'active'; // or 'pending', depending on your logic
+
+    // Basic validation
+    if (!supplierName || !contactPerson || !email || !phoneNumber) {
+        showAlert('Please fill in all required fields.', 'error');
+        return;
+    }
+
+    const newSupplier = {
+        supplierName,
+        contactPerson,
+        email,
+        phoneNumber,
+        totalAmountPaid,
+        lastShipmentDate,
+        notes,
+        status
+    };
+
+    fetch('http://localhost:8080/api/addsuppliers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSupplier)
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.text(); // Read response as plain text
+        } else {
+            // Error handling code
+            return response.text().then(text => {
+                throw new Error(text || 'Failed to add supplier.');
+            });
+        }
+    })
+    .then(message => {
+        showAlert(message || 'Supplier added successfully.', 'success');
+        // Since we don't have the added supplier data, fetch the suppliers again
+        fetchSuppliers();
+        closeModal('addSupplierModal'); // Close the modal
+    })
+    .catch(error => {
+        console.error('Error adding supplier:', error);
+        showAlert(error.message, 'error');
+    });
+}
+
+        /**
+         * Populates and opens the Edit Supplier modal with the selected supplier's data.
+         * @param {number} supplierId - The ID of the supplier to edit.
+         */
+        function editSupplier(supplierId) {
+            const supplier = suppliers.find(s => s.supplierId === supplierId);
+            if (supplier) {
+                // Populate the form with supplier data
+                document.getElementById('editSupplierId').value = supplier.supplierId;
+                document.getElementById('editSupplierName').value = supplier.supplierName;
+                document.getElementById('editSupplierContact').value = supplier.contactPerson;
+                document.getElementById('editSupplierEmail').value = supplier.email;
+                document.getElementById('editSupplierPhoneNumber').value = supplier.phoneNumber;
+                document.getElementById('editSupplierTotalAmountPaid').value = supplier.totalAmountPaid;
+                document.getElementById('editSupplierLastShipmentDate').value = supplier.lastShipmentDate;
+                document.getElementById('editSupplierNotes').value = supplier.notes;
+                document.getElementById('editSupplierStatus').value = supplier.status;
+
+                // Open the Edit Supplier modal
+                openModal('editSupplierModal');
+            } else {
+                showAlert('Supplier not found.', 'error');
+            }
+        }
+
+        /**
+         * Handles the submission of the Edit Supplier form.
+         */
+        function handleEditSupplierSubmit() {
+            const supplierId = parseInt(document.getElementById('editSupplierId').value, 10);
+            const supplierName = document.getElementById('editSupplierName').value.trim();
+            const contactPerson = document.getElementById('editSupplierContact').value.trim();
+            const email = document.getElementById('editSupplierEmail').value.trim();
+            const phoneNumber = document.getElementById('editSupplierPhoneNumber').value.trim();
+            const totalAmountPaid = parseFloat(document.getElementById('editSupplierTotalAmountPaid').value) || 0.0;
+            const lastShipmentDate = document.getElementById('editSupplierLastShipmentDate').value || null;
+            const notes = document.getElementById('editSupplierNotes').value.trim();
+            const status = document.getElementById('editSupplierStatus').value;
+
+            // Basic validation
+            if (!supplierName || !contactPerson || !email || !phoneNumber) {
+                showAlert('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            const updatedSupplier = {
+                supplierId,
+                supplierName,
+                contactPerson,
+                email,
+                phoneNumber,
+                totalAmountPaid,
+                lastShipmentDate,
+                notes,
+                status
+            };
+
+            fetch(`http://localhost:8080/api/suppliers/${supplierId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedSupplier)
+            })
+            .then(response => {
+                if (response.ok) {
+                    showAlert('Supplier updated successfully.', 'success');
+                    // Update the supplier in the local array
+                    const index = suppliers.findIndex(s => s.supplierId === supplierId);
+                    if (index !== -1) {
+                        suppliers[index] = updatedSupplier;
+                        updateSupplierDisplay();
+                        updateStatistics();
+                    }
+                    closeModal('editSupplierModal'); // Close the modal
+                } else {
+                    // Attempt to parse the error message as JSON, if possible
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to update supplier.');
+                    }).catch(() => {
+                        // If JSON parsing fails, throw the plain text response
+                        return response.text().then(text => {
+                            throw new Error(text || 'Failed to update supplier.');
+                        });
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error updating supplier:', error);
+                showAlert(error.message, 'error');
+            });
+        }
+
+        /**
+         * Deletes a supplier after user confirmation.
+         * @param {number} supplierId - The ID of the supplier to delete.
+         */
+        function deleteSupplier(supplierId) {
+            if (confirm('Are you sure you want to delete this supplier?')) {
+                fetch(`http://localhost:8080/api/suppliers/${supplierId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        showAlert('Supplier deleted successfully.', 'success');
+                        // Remove the supplier from the local array
+                        suppliers = suppliers.filter(s => s.supplierId !== supplierId);
+                        updateSupplierDisplay();
+                        updateStatistics();
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Failed to delete supplier.');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting supplier:', error);
+                    showAlert(error.message, 'error');
+                });
+            }
+        }
+    </script>
+
+    
+</body>
+</html>

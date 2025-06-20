@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head Content -->
+    <meta charset="UTF-8">
+    <title>Sales Report</title>
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    
+    <!-- Chart.js -->
+    <script src="js/chart.min.js"></script>
+    
+    <!-- Moment.js and Chart.js Adapter -->
+    <script src="js/moment.min.js"></script>
+    <script src="js/chartjs-adapter-moment.min.js"></script>
+    
+    <!-- FileSaver.js for Exporting -->
+    <script src="js/FileSaver.min.js"></script>
+    
+    <!-- PapaParse for CSV Export -->
+    <script src="js/papaparse.min.js"></script>
+    
+    <!-- html2canvas for screenshots -->
+    <script src="js/html2canvas.min.js"></script>
+    
+    <!-- jsPDF for PDF export -->
+    <script src="js/jspdf.umd.min.js"></script>
+    
+    <!-- Print Styles -->
+    <style>
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 300px;
+            padding: 15px;
+            background-color: #4CAF50; /* Green for success */
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .custom-alert.error {
+            background-color: #f44336; /* Red for error */
+        }
+
+        .custom-alert.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media print {
+            /* Hide the sidebar */
+            aside {
+                display: none;
+            }
+
+            /* Hide buttons */
+            button {
+                display: none;
+            }
+
+            /* Ensure the main content takes full width */
+            .flex-1 {
+                width: 100%;
+            }
+
+            /* Adjust padding for print */
+            .flex-1 {
+                padding: 0;
+            }
+
+            /* Optional: Customize fonts and colors for print */
+            h1, h2, h3, p {
+                font-size: 16pt;
+            }
+
+            .bg-white {
+                background-color: white !important;
+            }
+
+            /* Ensure chart canvas is fully visible */
+            #salesChart {
+                width: 100% !important;
+                height: 400px !important; /* Adjust as needed */
+            }
+
+            /* Ensure table is fully visible */
+            table {
+                width: 100% !important;
+                table-layout: fixed;
+            }
+
+            /* Prevent page breaks inside the chart container */
+            .shadow-md {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+
+    <!-- Custom Alert -->
+    <div id="customAlert" class="custom-alert"></div>
+
+    <!-- Sidebar and Content Wrapper -->
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-md flex flex-col">
+            <div class="p-6">
+                <img src="img/HB solutions.jpeg" alt="Logo" class="w-16 h-16 mb-4 mx-auto">
+                <h2 class="text-center text-xl font-semibold">3008</h2>
+                <nav class="mt-8">
+                    <ul class="space-y-4">
+                        <li id="dashboardMenu">
+                            <a href="dash4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/home.svg" alt="Dashboard Icon" class="w-6 h-6 mr-2" />لوحة التحكم
+                            </a>
+                        </li>
+                        <li id="newSaleMenu">
+                            <a href="newSale4.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="New Sale Icon" class="w-6 h-6 mr-2" />عملية بيع جديدة
+                            </a>
+                        </li>
+                        <li id="inventoryMenu">
+                            <a href="inventory3.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/archive.svg" alt="Inventory Icon" class="w-6 h-6 mr-2" />المخزون
+                            </a>
+                        </li>
+                        <li id="ordersMenu">
+                            <a href="orders2.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/shopping-cart.svg" alt="Orders Icon" class="w-6 h-6 mr-2" />الطلبات
+                            </a>
+                        </li>
+                        <li id="suppliersMenu">
+                            <a href="suppliers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/truck.svg" alt="Suppliers Icon" class="w-6 h-6 mr-2" />الموردين
+                            </a>
+                        </li>
+                        <li id="customersMenu">
+                            <a href="customers.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/users.svg" alt="Customers Icon" class="w-6 h-6 mr-2" />العملاء
+                            </a>
+                        </li>
+                        <li id="adminAccessMenu">
+                            <a href="RoleAssign.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/user-plus.svg" alt="Admin Access Icon" class="w-6 h-6 mr-2" />صلاحيات الإدارة
+                            </a>
+                        </li>
+                        <li id="reportsMenu">
+                            <a href="saleReport.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />التقارير
+                            </a>
+                        </li>
+                        <li id="gainsMenu">
+                            <a href="profitTracking.html" class="flex items-center py-2 px-4 hover:bg-blue-100 rounded">
+                                <img src="icons/file-text.svg" alt="Reports Icon" class="w-6 h-6 mr-2" />الأرباح
+                            </a>
+                        </li>
+                        <li>                 
+                            <button onclick="logout()"
+                                class="bg-blue-200 hover:bg-blue-300 text-blue-800 font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <img src="icons/log-out.svg" alt="Logout Icon" class="w-6 h-6 mr-2" />
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            <h1 class="text-3xl font-bold mb-6">تقرير المبيعات</h1>
+
+            <!-- Summary Cards -->
+            <div id="summarySection" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                    <img src="icons/dollar-sign.svg" alt="Total Sales Icon" class="w-8 h-8 text-blue-500 mr-4" />
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-600">إجمالي المبيعات</h3>
+                        <p id="totalSales" class="text-2xl font-bold"> دج 0.00</p>
+                    </div>
+                </div>
+            
+                <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                    <img src="icons/repeat.svg" alt="Total Transactions Icon" class="w-8 h-8 text-blue-500 mr-4" />
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-600">إجمالي المعاملات</h3>
+                        <p id="totalTransactions" class="text-2xl font-bold">0</p>
+                    </div>
+                </div>
+                    <!-- New Total Profits Card -->
+                    <div class="bg-white p-6 rounded-lg shadow-md flex items-center cursor-pointer" onclick="navigateToProfitTracking()">
+                        <img src="icons/dollar-sign.svg" alt="Total Profit Icon" class="w-8 h-8 text-green-500 mr-4" />
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-600">إجمالي الأرباح لهذا الشهر</h3>
+                            <p id="totalProfits" class="text-2xl font-bold"> دج 0.00</p>
+                        </div>
+                    </div>
+                    
+            </div>
+
+            <!-- Filters Section -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block mb-2 font-medium">من تاريخ</label>
+                        <input type="date" id="fromDate" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-2 font-medium">إلى تاريخ</label>
+                        <input type="date" id="toDate" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <!-- Store Number Dropdown -->
+                    <div>
+                        <label class="block mb-2 font-medium">اختر المتجر</label>
+                        <select id="storeNumberDropdown" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">جميع المتاجر</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button onclick="applyFilters()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">تطبيق الفلاتر</button>
+                    <button onclick="exportCSV()" class="ml-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        تصدير CSV
+                    </button>
+                    <button onclick="printPDF()" class="ml-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        تصدير PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sales Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-xl font-semibold mb-4">المبيعات والإيرادات بمرور الوقت</h2>
+                <div class="relative h-96"> <!-- Fixed height container (h-96 = 24rem) -->
+                    <canvas id="salesChart" class="absolute top-0 left-0 w-full h-full"></canvas>
+                </div>
+                <div id="salesChartMessage" class="text-center text-gray-500 hidden">لا توجد بيانات مبيعات متاحة للنطاق الزمني المحدد.</div>
+            </div>
+
+            <!-- Sales Transactions Table -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">معاملات المبيعات</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الطلب</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">الإجمالي</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Rows will be populated here -->
+                        </tbody>
+                    </table>
+                    <div id="salesTableMessage" class="text-center text-gray-500 mt-4 hidden">لم يتم العثور على طلبات مؤكدة في النطاق الزمني المحدد.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="js/logout.js"></script>
+
+    <!-- Scripts -->
+    <script>
+        let allStoreNumbers = [];
+        let salesData = []; // This will hold the fetched sales data
+        let chartInstance; // To hold the chart instance
+        let filtersApplied = false; // Flag to track if filters are applied
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    const role = localStorage.getItem('adminRole'); // Retrieve role
+
+// Adjust menu based on role
+adjustMenuBasedOnRole(role);
+
+// If role is not 'Owner' or 'Manager', redirect to 'newSale4.html'
+if (role !== 'owner' && role !== 'manager') {
+    window.location.href = 'newSale4.html';
+    return;
+}
+
+   
+
+    fetchAllStoreNumbers(); // Fetch store numbers, but do not call fetchSalesData initially
+    fetchInitialProfits();
+
+});
+
+
+
+async function fetchInitialProfits() {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+
+    const today = new Date();
+    const startDate = startOfMonth.toISOString().split('T')[0];
+    const endDate = today.toISOString().split('T')[0];
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/profit?startDate=${startDate}&endDate=${endDate}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        const totalProfit = data.reduce((sum, record) => sum + record.net_profit, 0);
+
+        document.getElementById('totalProfits').textContent = `دج ${totalProfit.toFixed(2)}`;
+    } catch (error) {
+        console.error('Error fetching profits:', error);
+        showAlert('تعذر تحميل الأرباح الإجمالية. يرجى المحاولة لاحقًا.', 'error');
+    }
+}
+
+
+function adjustMenuBasedOnRole(role) {
+            const dashboardMenu = document.getElementById('dashboardMenu');
+            const newSaleMenu = document.getElementById('newSaleMenu');
+            const inventoryMenu = document.getElementById('inventoryMenu');
+            const ordersMenu = document.getElementById('ordersMenu');
+            const suppliersMenu = document.getElementById('suppliersMenu');
+            const customersMenu = document.getElementById('customersMenu');
+            const adminAccessMenu = document.getElementById('adminAccessMenu');
+            const reportsMenu = document.getElementById('reportsMenu');
+            const gainsMenu = document.getElementById('gainsMenu');
+
+            if (role === 'owner') {
+                // Do nothing, show all menus
+            } else if (role === 'manager') {
+                // Hide adminAccessMenu and reportsMenu
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            } else {
+                // For other roles, only show newSaleMenu and ordersMenu
+                if (dashboardMenu) dashboardMenu.style.display = 'none';
+                if (inventoryMenu) inventoryMenu.style.display = 'none';
+                if (suppliersMenu) suppliersMenu.style.display = 'none';
+                if (customersMenu) customersMenu.style.display = 'none';
+                if (adminAccessMenu) adminAccessMenu.style.display = 'none';
+                if (reportsMenu) reportsMenu.style.display = 'none';
+                if (gainsMenu) gainsMenu.style.display = 'none';
+
+            }
+        }
+
+      
+
+        function fetchSalesData() {
+    const fromDateValue = document.getElementById('fromDate').value;
+    const toDateValue = document.getElementById('toDate').value;
+    const storeNumber = document.getElementById('storeNumberDropdown').value;
+
+    let url = `http://localhost:8080/api/orders/confirm-orders?startDate=${fromDateValue}&endDate=${toDateValue}`;
+
+    if (storeNumber) {
+        url += `&storeNumber=${storeNumber}`;
+    }
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                // If response is 404 or no data found, handle it here
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.length === 0) {
+                // Show custom message in Arabic if no data is found
+                showAlert("لا توجد بيانات لهذا المتجر في الفترة المحددة. يرجى اختيار نطاق زمني صحيح لرؤية المبيعات.", "error");
+                return;
+            }
+
+            salesData = data;
+            renderSalesTransactions(salesData);
+            updateSummaryStatistics(salesData);
+            renderSalesChart(salesData);
+        })
+        .catch(error => {
+            // If the error message is specific to no confirmed orders, show the custom alert in Arabic
+            if (error.message === 'No confirmed orders found in the specified date range.') {
+                showAlert("لا توجد بيانات لهذا المتجر في الفترة المحددة. يرجى اختيار نطاق زمني صحيح لرؤية المبيعات.", "error");
+            } else {
+                console.error('Error fetching sales data:', error);
+                showAlert("حدث خطأ أثناء جلب بيانات المبيعات. يرجى المحاولة مرة أخرى لاحقًا.", "error");
+            }
+        });
+}
+
+
+
+
+        function renderSalesTransactions(data) {
+    const tbody = document.getElementById('salesTableBody');
+    const salesTableMessage = document.getElementById('salesTableMessage');
+
+    if (data.length === 0) {
+        tbody.innerHTML = ''; // Clear any existing rows
+        salesTableMessage.classList.remove('hidden');
+    } else {
+        salesTableMessage.classList.add('hidden');
+        tbody.innerHTML = data.map(transaction => `
+            <tr>
+                <td class="px-6 py-4">
+                    <a href="orderDetails.html?orderId=${transaction.orderId}" class="text-blue-500 hover:underline">${transaction.orderId}</a>
+                </td>
+                <td class="px-6 py-4">${transaction.orderDateTime}</td>
+                <td class="px-6 py-4">${transaction.totalPrice.toFixed(2)} دج</td>
+                <td class="px-6 py-4">${transaction.status}</td>
+            </tr>`).join('');
+    }
+}
+
+
+function updateSummaryStatistics(data) {
+    const totalSales = data.reduce((sum, t) => sum + t.totalPrice, 0);
+    const totalTransactions = data.length;
+    const totalRevenue = totalSales; // Adjust if you have revenue data
+
+    document.getElementById('totalSales').textContent = `${totalSales.toFixed(2)} دج`;
+    //document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)} دج`;
+    document.getElementById('totalTransactions').textContent = totalTransactions;
+
+    // Enable or disable Export PDF and Export CSV buttons based on data
+    const exportPDFButton = document.querySelector('button[onclick="printPDF()"]');
+    const exportCSVButton = document.querySelector('button[onclick="exportCSV()"]');
+
+    if (data.length === 0) {
+        exportPDFButton.disabled = true;
+        exportPDFButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+        exportCSVButton.disabled = true;
+        exportCSVButton.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+        exportPDFButton.disabled = false;
+        exportPDFButton.classList.remove('opacity-50', 'cursor-not-allowed');
+
+        exportCSVButton.disabled = false;
+        exportCSVButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+
+function applyFilters() {
+    filtersApplied = true; // Set the flag to true when the user clicks apply
+
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+
+    if (!fromDate || !toDate) {
+        if (filtersApplied) {
+            showAlert("Please select both From Date and To Date.", 'error');
+        }
+        return;
+    }
+
+    if (new Date(fromDate) > new Date(toDate)) {
+        showAlert("From Date cannot be later than To Date.", 'error');
+        return;
+    }
+
+    fetchSalesData(); // Fetch data only if dates are valid and filters are applied
+}
+
+
+        function printPDF() {
+            if (salesData.length === 0) {
+                showAlert("No data available to export.");
+                return;
+            }
+            window.print();
+        }
+
+        function aggregateSalesDataByDate(data) {
+            const salesByDate = {};
+
+            data.forEach(order => {
+                const date = order.orderDateTime.split(' ')[0]; // Get the date part
+                if (!salesByDate[date]) {
+                    salesByDate[date] = 0;
+                }
+                salesByDate[date] += order.totalPrice;
+            });
+
+            // Convert to arrays for labels and data
+            const labels = Object.keys(salesByDate).sort();
+            const salesValues = labels.map(date => salesByDate[date]);
+
+            return { labels, salesValues };
+        }
+
+        function renderSalesChart(data) {
+            const { labels, salesValues } = aggregateSalesDataByDate(data);
+            const salesChartMessage = document.getElementById('salesChartMessage');
+            const salesChartCanvas = document.getElementById('salesChart');
+
+            if (labels.length === 0) {
+                salesChartCanvas.style.display = 'none';
+                salesChartMessage.classList.remove('hidden');
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+            } else {
+                salesChartCanvas.style.display = 'block';
+                salesChartMessage.classList.add('hidden');
+                const ctx = salesChartCanvas.getContext('2d');
+
+                // Destroy previous chart instance if it exists
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Sales',
+                            data: salesValues,
+                            borderColor: 'blue',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false, // Allows manual sizing
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    parser: 'YYYY-MM-DD',
+                                    unit: 'day',
+                                    displayFormats: {
+                                        day: 'MMM D'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Sales ($)'
+                                },
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Handle chart resizing before and after print
+        function handlePrint() {
+            if (chartInstance) {
+                chartInstance.resize();
+            }
+        }
+
+        if (window.matchMedia) {
+            const mediaQueryList = window.matchMedia('print');
+            mediaQueryList.addListener((mql) => {
+                if (mql.matches) {
+                    handlePrint();
+                }
+            });
+        }
+
+        window.onbeforeprint = handlePrint;
+        window.onafterprint = () => {
+            if (chartInstance) {
+                chartInstance.resize();
+            }
+        };
+
+        // Updated exportCSV function with BOM and proper formatting
+        function exportCSV() {
+    if (salesData.length === 0) {
+        showAlert("No data available to export.");
+        return;
+    }
+
+    // Add BOM for Excel compatibility
+    let csvContent = "\uFEFFOrder ID,Date,Total (دج),Status\r\n";
+
+    salesData.forEach(t => {
+        // Replace any existing double quotes in data to prevent CSV breaking
+        const orderId = `"${String(t.orderId).replace(/"/g, '""')}"`;
+        const date = `"${String(t.orderDateTime).replace(/"/g, '""')}"`;
+        const total = `"${t.totalPrice.toFixed(2)} دج"`;
+        const status = `"${String(t.status).replace(/"/g, '""')}"`;
+
+        csvContent += `${orderId},${date},${total},${status}\r\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'sales_report.csv');
+}
+
+
+        // Function to fetch and populate store numbers
+        async function fetchAllStoreNumbers() {
+            try {
+                const response = await fetch('http://localhost:8080/api/store-numbers');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                allStoreNumbers = await response.json();
+                populateStoreNumberDropdown(allStoreNumbers);
+            } catch (error) {
+                console.error('Error fetching store numbers:', error);
+                showAlert('Failed to load store numbers. Please try again later.', 'error');
+            }
+        }
+
+        // Function to populate the store number dropdown
+        function populateStoreNumberDropdown(storeNumbers) {
+            const dropdown = document.getElementById('storeNumberDropdown');
+            dropdown.innerHTML = '<option value="">All Stores</option>'; // Reset options
+
+            storeNumbers.forEach(storeNumber => {
+                const option = document.createElement('option');
+                option.value = storeNumber;
+                option.textContent = `Store ${storeNumber}`;
+                dropdown.appendChild(option);
+            });
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('customAlert');
+
+            // Set message and type (success or error)
+            alertBox.textContent = message;
+            alertBox.className = 'custom-alert'; // Reset classes
+            alertBox.classList.add(type); // Add type-specific class ('success' or 'error')
+            alertBox.classList.add('show'); // Show the alert
+
+            // Automatically hide the alert after 3 seconds
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 3000);
+        }
+
+
+        function navigateToProfitTracking() {
+            window.location.href = 'profitTracking.html';
+        }
+
+    </script>
+</body>
+</html>

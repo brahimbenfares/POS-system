@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الذكاء الاصطناعي</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <script src="AiJs/ai_dashboard.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+    <!-- AI Sidebar -->
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+
+    <!-- AI Dashboard Content -->
+    <div class="flex-1 p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">📊 لوحة تحكم الذكاء الاصطناعي</h1>
+
+        <!-- AI Dashboard Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Sales Forecast -->
+            <a href="ai_sales_forecast.html" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition border">
+                <h3 class="text-xl font-semibold">📈 توقعات المبيعات</h3>
+                <p class="text-gray-600 mt-2">تحليل المبيعات المتوقعة مقارنة بالمبيعات الفعلية.</p>
+                <p class="text-blue-600 font-bold mt-2">🔹 <span id="salesForecastSummary">تحميل...</span></p>
+            </a>
+
+            <!-- AI Reordering -->
+            <a href="ai_reorder.html" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition border">
+                <h3 class="text-xl font-semibold">🔄 إعادة الطلب الذكي</h3>
+                <p class="text-gray-600 mt-2">إدارة عمليات إعادة الطلب بناءً على توقعات المبيعات.</p>
+                <p class="text-blue-600 font-bold mt-2">📦 <span id="reorderSummary">تحميل...</span></p>
+            </a>
+
+            <!-- Stock Risk Analysis -->
+            <a href="ai_stock_risk.html" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition border">
+                <h3 class="text-xl font-semibold">⚠ تحليل المخزون</h3>
+                <p class="text-gray-600 mt-2">اكتشاف المنتجات التي قد تنفد قريبًا واتخاذ الإجراءات المناسبة.</p>
+                <p class="text-red-600 font-bold mt-2">🚨 <span id="stockRiskSummary">تحميل...</span></p>
+            </a>
+
+            <!-- AI Pricing Suggestions -->
+            <a href="ai_pricing.html" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition border">
+                <h3 class="text-xl font-semibold">💰 التسعير الذكي</h3>
+                <p class="text-gray-600 mt-2">تحليل الأسعار وتقديم اقتراحات لتحسين التسعير بناءً على العرض والطلب.</p>
+                <p class="text-green-600 font-bold mt-2">💲 <span id="pricingSummary">تحميل...</span></p>
+            </a>
+
+            <!-- Customer Trends -->
+            <a href="ai_customer_trends.html" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition border">
+                <h3 class="text-xl font-semibold">🛍️ اتجاهات العملاء</h3>
+                <p class="text-gray-600 mt-2">تحليل أنماط شراء العملاء لتعزيز التسويق والعروض.</p>
+                <p class="text-purple-600 font-bold mt-2">👥 <span id="customerTrendsSummary">تحميل...</span></p>
+            </a>
+        </div>
+    </div>
+    <script>
+        // Dynamically load the sidebar into the page
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("ai_sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+                })
+                .catch(error => console.error("Error loading sidebar:", error));
+        });
+
+</script>
+</body>
+</html>

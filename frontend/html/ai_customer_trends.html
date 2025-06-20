@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛍️ اتجاهات العملاء</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <script src="js/chart.min.js"></script> <!-- Chart.js for visual trends -->
+    <script src="AiJs/ai_customer_trends.js" defer></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+    
+    
+    <!-- Main Content -->
+    <div class="flex-1 p-10">
+        <div class="bg-white p-4 rounded-lg shadow-md mb-6 flex justify-between">
+            <h2 class="text-xl font-semibold">🛍️ اتجاهات العملاء</h2>
+            <div>
+                <label for="dateFilter" class="mr-2">📅 تصفية حسب:</label>
+                <select id="dateFilter" class="border p-2 rounded">
+                    <option value="daily">يومي</option>
+                    <option value="weekly">أسبوعي</option>
+                    <option value="monthly">شهري</option>
+                </select>
+            </div>
+        </div>
+        <!-- 🔥 Top Ordered Products -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">🏆 المنتجات الأكثر طلبًا</h2>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2">🏅 الترتيب</th>
+                        <th class="border px-4 py-2">📌 اسم المنتج</th>
+                        <th class="border px-4 py-2">🛍️ إجمالي الطلبات</th>
+                        <th class="border px-4 py-2">🔥 إجمالي المبيعات</th>
+                    </tr>
+                </thead>
+                <tbody id="topOrderedProductsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- ⏰ Peak Buying Hours -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">⏰ ساعات الشراء الأكثر ازدحامًا</h2>
+            <canvas id="peakHoursChart" class="w-full h-64"></canvas>
+        </div>
+
+        <!-- 🚀 Trending Products -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">🚀 المنتجات الأكثر مبيعًا</h2>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2">🏆 الترتيب</th>
+                        <th class="border px-4 py-2">📌 اسم المنتج</th>
+                        <th class="border px-4 py-2">🔥 إجمالي المبيعات</th>
+                        <th class="border px-4 py-2">🛒 الطلبات</th>
+                    </tr>
+                </thead>
+                <tbody id="trendingProductsTable"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        // Dynamically load the sidebar into the page
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("ai_sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+                })
+                .catch(error => console.error("Error loading sidebar:", error));
+        });
+
+</script>
+</body>
+</html>

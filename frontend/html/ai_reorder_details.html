@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل إعادة الطلب</title>
+    <link rel="stylesheet" href="css/tailwind.min.css">
+    <script src="AiJs/ai_reorder_details.js" defer></script>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+
+    <!-- Sidebar -->
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+
+    <!-- Main Content -->
+    <div class="flex-1 p-10">
+        <h1 class="text-3xl font-bold mb-6">تفاصيل إعادة الطلب</h1>
+
+        <!-- Supplier Filter & Sorting -->
+        <div class="mb-4 flex items-center space-x-4">
+            <div>
+                <label for="supplierFilter" class="block text-lg font-medium">تصفية حسب المورد:</label>
+                <select id="supplierFilter" class="border px-2 py-1 w-full">
+                    <option value="">عرض الجميع</option>
+                </select>
+            </div>
+
+            <button id="sortBySupplier" class="bg-blue-500 text-white px-3 py-1 rounded">
+                🔄 ترتيب حسب المورد
+            </button>
+        </div>
+
+
+        <!-- Reorder Details Table -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">المنتجات المعاد طلبها</h2>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="border px-4 py-2">اسم المنتج</th>
+                        <th class="border px-4 py-2">كمية الطلب</th>
+                        <th class="border px-4 py-2">المورد</th>
+                        <th class="border px-4 py-2">الهاتف</th>
+                        <th class="border px-4 py-2">البريد الإلكتروني</th>
+                        <th class="border px-4 py-2">إجراء</th>
+                    </tr>
+                </thead>
+                
+                <tbody id="reorderDetailsTable"></tbody>
+            </table>
+
+            <!-- Confirm All Button -->
+            <button id="confirmAll" class="bg-green-500 text-white px-4 py-2 mt-4 rounded">
+                ✅ تأكيد جميع المنتجات المتاحة
+            </button>
+        </div>
+    </div>
+    <script>
+        // Dynamically load the sidebar into the page
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("ai_sidebar.html")
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("sidebar-container").innerHTML = html;
+                })
+                .catch(error => console.error("Error loading sidebar:", error));
+        });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #f8f9fa; 
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 900px; 
+            margin: 30px auto; 
+            padding: 20px; 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .cart-item {
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            padding: 10px; 
+            border-bottom: 1px solid #ddd;
+        }
+        .cart-item img {
+            width: 60px; 
+            height: 60px; 
+            border-radius: 5px; 
+            object-fit: cover;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    
+    <div class="container">
+        <h2 class="text-2xl font-bold text-center text-gray-700 mb-6">Checkout</h2>
+
+        <!-- Login/Register Prompt -->
+        <div id="loginSection" class="hidden text-center text-sm mb-4">
+            <p class="text-gray-600">
+                You are not logged in. 
+                <a href="login.html" class="text-blue-600 hover:underline font-medium">Login</a> or 
+                <a href="register.html" class="text-blue-600 hover:underline font-medium">Create an Account</a>
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Customer Details Form -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Billing Details</h3>
+
+                <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                <input type="text" id="username" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-500" placeholder="Enter Full Name">
+
+                <label class="block text-sm font-medium text-gray-700 mt-3">Email</label>
+                <input type="email" id="email" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-500" placeholder="Enter Email">
+
+                <label class="block text-sm font-medium text-gray-700 mt-3">Phone Number</label>
+                <input type="text" id="phone" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-500" placeholder="Enter Phone Number">
+
+                <label class="block text-sm font-medium text-gray-700 mt-3">Address</label>
+                <input type="text" id="address" class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-500" placeholder="Enter Address">
+
+                <input type="hidden" id="customerId">
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Your Order</h3>
+                <div id="cartItems" class="space-y-3"></div>
+                <div class="mt-4 border-t pt-3">
+                    <p class="text-lg font-semibold text-gray-800">Total: $<span id="totalAmount">0.00</span></p>
+                </div>
+            </div>
+        </div>
+
+        <button id="placeOrder" class="w-full mt-6 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300">
+            Place Order
+        </button>
+
+        <!-- Order Confirmation -->
+        <div id="orderConfirmation" class="hidden text-center text-green-600 font-semibold mt-4"></div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            let token = localStorage.getItem("customerToken");
+            let customerId = null;
+    
+            function displayCart() {
+                let cartItemsDiv = $("#cartItems");
+                let totalAmount = 0;
+                cartItemsDiv.empty();
+    
+                if (cart.length === 0) {
+                    cartItemsDiv.append("<p class='text-gray-600 text-center'>Your cart is empty.</p>");
+                    $("#totalAmount").text("0.00");
+                    return;
+                }
+    
+                $.get("/api/products", function (products) {
+                    cart.forEach(item => {
+                        let product = products.find(p => p.id === item.id);
+                        if (product) {
+                            let itemTotal = product.salesPrice * item.quantity;
+                            totalAmount += itemTotal;
+    
+                            cartItemsDiv.append(`
+                                <div class="cart-item flex items-center justify-between" data-id="${product.id}">
+                                    <img src="${product.image_url || 'img/default-product.jpg'}" alt="${product.name}">
+                                    <div class="flex-grow">
+                                        <p class="font-medium">${product.name}</p>
+                                        <p class="text-sm text-gray-600">$${product.salesPrice.toFixed(2)}</p>
+                                    </div>
+                                    <div class="flex items-center border rounded-md">
+                                        <button class="quantity-btn px-3 py-1 text-white bg-red-500 hover:bg-red-600" data-id="${product.id}" data-action="decrease">−</button>
+                                        <span class="mx-3 font-bold quantity-text" data-id="${product.id}">${item.quantity}</span>
+                                        <button class="quantity-btn px-3 py-1 text-white bg-green-500 hover:bg-green-600" data-id="${product.id}" data-action="increase">+</button>
+                                    </div>
+                                    <p class="ml-4 font-semibold">$<span class="total-price" data-id="${product.id}">${itemTotal.toFixed(2)}</span></p>
+                                </div>
+                            `);
+                        }
+                    });
+    
+                    $("#totalAmount").text(totalAmount.toFixed(2));
+                });
+            }
+    
+            displayCart();
+    
+            if (token) {
+                $.ajax({
+                    url: "/api/customers/profile",
+                    type: "GET",
+                    headers: { Authorization: "Bearer " + token },
+                    success: function (customer) {
+                        customerId = customer.customerId;
+                        $("#customerId").val(customer.customerId);
+                        $("#username").val(customer.username);
+                        $("#email").val(customer.email);
+                        $("#phone").val(customer.phoneNumber);
+                        $("#address").val(customer.address || "");
+                    },
+                    error: function () {
+                        $("#loginSection").removeClass("hidden");
+                    }
+                });
+            } else {
+                $("#customerId").val("New Customer");
+                $("#loginSection").removeClass("hidden");
+            }
+    
+            $("#placeOrder").click(function () {
+                if (cart.length === 0) {
+                    alert("Cart is empty!");
+                    return;
+                }
+    
+                let orderData = {
+                    delivery: 5.00,
+                    orderItems: cart.map(item => ({
+                        productId: item.id,
+                        quantity: item.quantity,
+                        promoId: null,
+                        discountPercentage: 0,
+                        discountAmount: 0,
+                        finalPrice: item.quantity * item.salesPrice
+                    }))
+                };
+    
+                if (customerId) {
+                    orderData.customerId = customerId;
+                    sendOrder(orderData);
+                } else {
+                    let newCustomer = {
+                        username: $("#username").val(),
+                        email: $("#email").val(),
+                        phoneNumber: $("#phone").val(),
+                        address: $("#address").val()
+                    };
+    
+                    $.post("/api/customers", JSON.stringify(newCustomer), function (customerResponse) {
+                        customerId = customerResponse.customerId;
+                        orderData.customerId = customerId;
+                        sendOrder(orderData);
+                    });
+                }
+            });
+    
+            function sendOrder(orderData) {
+                $.post("/api/create-order", JSON.stringify(orderData), function (response) {
+                    $("#orderConfirmation").text(`Order placed successfully! Order ID: ${response.orderId}`).removeClass("hidden");
+                    localStorage.removeItem("cart");
+                    setTimeout(() => window.location.href = "customersIndex.html", 3000);
+                });
+            }
+    
+            $(document).on("click", ".quantity-btn", function () {
+                let productId = $(this).data("id");
+                let action = $(this).data("action");
+    
+                let cart = JSON.parse(localStorage.getItem("cart")) || [];
+                let itemIndex = cart.findIndex(item => item.id === productId);
+    
+                if (itemIndex !== -1) {
+                    let productPrice = parseFloat($(`.total-price[data-id="${productId}"]`).text()) / cart[itemIndex].quantity;
+    
+                    if (action === "increase") {
+                        cart[itemIndex].quantity++;
+                    } else if (action === "decrease") {
+                        cart[itemIndex].quantity--;
+    
+                        if (cart[itemIndex].quantity <= 0) {
+                            cart.splice(itemIndex, 1);
+                            localStorage.setItem("cart", JSON.stringify(cart));
+    
+                            $(`.cart-item[data-id="${productId}"]`).fadeOut(300, function () {
+                                $(this).remove();
+                                updateTotalAmount();
+                            });
+                            return;
+                        }
+                    }
+    
+                    localStorage.setItem("cart", JSON.stringify(cart));
+    
+                    let newQuantity = cart[itemIndex].quantity;
+                    let itemTotal = newQuantity * productPrice;
+    
+                    $(`.quantity-text[data-id="${productId}"]`).text(newQuantity);
+                    $(`.total-price[data-id="${productId}"]`).text(itemTotal.toFixed(2));
+    
+                    updateTotalAmount();
+                }
+            });
+    
+            function updateTotalAmount() {
+                let cart = JSON.parse(localStorage.getItem("cart")) || [];
+                let totalAmount = cart.reduce((sum, item) => {
+                    let productPrice = parseFloat($(`.total-price[data-id="${item.id}"]`).text()) / item.quantity;
+                    return sum + (item.quantity * productPrice);
+                }, 0);
+                $("#totalAmount").text(totalAmount.toFixed(2));
+            }
+        });
+    </script>
+    
+    
+</body>
+</html>
