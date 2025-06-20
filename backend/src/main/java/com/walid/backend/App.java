@@ -20,7 +20,7 @@ import com.walid.backend.Controller.CustomerController;
 import com.walid.backend.DAO.AdminDAO;
 import com.walid.backend.DAO.OrderDAO;
 import com.walid.backend.DAO.ProductDAO;
-import com.walid.backend.Service.AISalesForecastService;
+import com.walid.backend.Service.ForecastService;
 import com.walid.backend.Service.AdminService;
 //import com.walid.backend.Service.CustomerService;
 import com.walid.backend.Service.OrderService;
@@ -77,7 +77,7 @@ public class App {
         AISalesForecastController aiController = new AISalesForecastController();
 
 // ✅ Initialize AI Sales Forecast Service
-AISalesForecastService forecastService = new AISalesForecastService();
+ForecastService forecastService = new ForecastService();
 
 // ✅ Initialize Scheduled Executor for Daily AI Forecast and Promotion Updates
 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2); // Uses 2 threads for concurrency
