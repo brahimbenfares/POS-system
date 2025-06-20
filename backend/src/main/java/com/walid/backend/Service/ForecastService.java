@@ -1,7 +1,7 @@
 package com.walid.backend.Service;
 
 import com.walid.backend.AI.SalesForecastAI;
-import com.walid.backend.DAO.AISalesForecastDAO;
+import com.walid.backend.DAO.ForecastDAO;
 import com.walid.backend.Model.AISalesForecast;
 import com.walid.backend.Model.SalesHistory;
 
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-public class AISalesForecastService {
+public class ForecastService {
 
     private final SalesForecastAI aiModel;
     private final AISalesForecastDAO forecastDAO;  // 🔹 Create an instance of DAO
